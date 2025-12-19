@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CommanderTrait" load_steps=2 format=3 uid="uid://cm8trait1assault"]
+
+[ext_resource type="Script" path="res://scripts/resources/commander_trait.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trait_name = "Combat Focus"
+description = "Increases energy regeneration, allowing more aggressive unit deployment."
+trait_type = 0
+modifier_value = 0.25

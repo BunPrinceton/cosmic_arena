@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CommanderAbility" load_steps=2 format=3 uid="uid://cm8ability1assault"]
+
+[ext_resource type="Script" path="res://scripts/resources/commander_ability.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ability_name = "Shock Wave"
+description = "Unleashes a powerful shockwave that damages all enemies in range."
+ability_type = 0
+cooldown = 10.0
+range = 150.0
+power = 60.0
+duration = 0.0
+visual_color = Color(1, 0.4, 0.2, 1)

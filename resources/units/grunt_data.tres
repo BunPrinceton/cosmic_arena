@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3 uid="uid://bm9k5rx2pqwr1"]
+
+[ext_resource type="Script" path="res://scripts/resources/unit_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+unit_name = "Grunt"
+description = "Fast, cheap melee unit. Good for overwhelming enemies with numbers."
+visual_color = Color(0.6, 0.8, 0.3, 1)
+max_health = 80.0
+move_speed = 100.0
+attack_damage = 15.0
+attack_range = 40.0
+attack_cooldown = 1.2
+vision_range = 150.0
+energy_cost = 1.5
+visual_size = Vector2(20, 20)
+is_ranged = false
+is_support = false
+heal_amount = 0.0
+heal_range = 0.0

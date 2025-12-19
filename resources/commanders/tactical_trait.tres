@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CommanderTrait" load_steps=2 format=3 uid="uid://cm8trait2tactical"]
+
+[ext_resource type="Script" path="res://scripts/resources/commander_trait.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trait_name = "Strategic Mind"
+description = "Deployed units gain increased health, making your army more durable."
+trait_type = 2
+modifier_value = 0.20

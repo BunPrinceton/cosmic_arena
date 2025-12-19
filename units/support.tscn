@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://b8n9m5kx2pqwr"]
+
+[ext_resource type="Script" path="res://scripts/units/unit_support.gd" id="1"]
+[ext_resource type="Resource" uid="uid://bx7m9kx5pqwr4" path="res://resources/units/support_data.tres" id="2"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 10.0
+
+[node name="Support" type="CharacterBody2D"]
+collision_layer = 1
+collision_mask = 6
+script = ExtResource("1")
+unit_data = ExtResource("2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="Visual" type="ColorRect" parent="."]
+offset_left = -10.0
+offset_top = -10.0
+offset_right = 10.0
+offset_bottom = 10.0
+color = Color(0.3, 0.9, 0.5, 1)

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3 uid="uid://c8n7kx3mjpr2"]
+
+[ext_resource type="Script" path="res://scripts/resources/unit_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+unit_name = "Ranger"
+description = "Ranged attacker with long range. Excellent for picking off enemies from a distance."
+visual_color = Color(0.3, 0.6, 0.9, 1)
+max_health = 100.0
+move_speed = 70.0
+attack_damage = 25.0
+attack_range = 120.0
+attack_cooldown = 1.5
+vision_range = 180.0
+energy_cost = 2.5
+visual_size = Vector2(18, 18)
+is_ranged = true
+is_support = false
+heal_amount = 0.0
+heal_range = 0.0

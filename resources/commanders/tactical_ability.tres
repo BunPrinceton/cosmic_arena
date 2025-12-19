@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CommanderAbility" load_steps=2 format=3 uid="uid://cm8ability2tactical"]
+
+[ext_resource type="Script" path="res://scripts/resources/commander_ability.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ability_name = "Rally"
+description = "Heals all nearby friendly units and the commander."
+ability_type = 1
+cooldown = 12.0
+range = 180.0
+power = 80.0
+duration = 0.0
+visual_color = Color(0.3, 1, 0.3, 1)

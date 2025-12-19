@@ -1,0 +1,93 @@
+[gd_scene load_steps=10 format=3 uid="uid://dk8n4pxw7mjpr"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://c8pqn7kx4mjpr" path="res://ui/hud.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://bxq7oakw3mjpr" path="res://scenes/arena.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://cpq8n4kxw7hjr" path="res://scenes/core.tscn" id="4"]
+[ext_resource type="Script" path="res://scripts/commanders/player_commander.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/commanders/ai_commander.gd" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/capture_point.tscn" id="7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(40, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_enemy"]
+size = Vector2(40, 40)
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+
+[node name="Arena" parent="." instance=ExtResource("3")]
+
+[node name="CapturePoint" parent="." instance=ExtResource("7")]
+position = Vector2(0, 300)
+
+[node name="PlayerCore" parent="." instance=ExtResource("4")]
+position = Vector2(0, 600)
+
+[node name="EnemyCore" parent="." instance=ExtResource("4")]
+team = 1
+
+[node name="PlayerCommander" type="CharacterBody2D" parent="."]
+position = Vector2(0, 500)
+collision_mask = 6
+script = ExtResource("5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerCommander"]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="Visual" type="ColorRect" parent="PlayerCommander"]
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(0.2, 0.7, 1, 1)
+
+[node name="HealthBarBg" type="ColorRect" parent="PlayerCommander"]
+offset_left = -25.0
+offset_top = -30.0
+offset_right = 25.0
+offset_bottom = -25.0
+color = Color(0.2, 0.2, 0.2, 1)
+
+[node name="HealthBar" type="ColorRect" parent="PlayerCommander"]
+offset_left = -25.0
+offset_top = -30.0
+offset_right = 25.0
+offset_bottom = -25.0
+color = Color(0.2, 1, 0.2, 1)
+
+[node name="EnemyCommander" type="CharacterBody2D" parent="."]
+position = Vector2(0, 100)
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyCommander"]
+shape = SubResource("RectangleShape2D_enemy")
+
+[node name="Visual" type="ColorRect" parent="EnemyCommander"]
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(1, 0.3, 0.3, 1)
+
+[node name="HealthBarBg" type="ColorRect" parent="EnemyCommander"]
+offset_left = -25.0
+offset_top = -30.0
+offset_right = 25.0
+offset_bottom = -25.0
+color = Color(0.2, 0.2, 0.2, 1)
+
+[node name="HealthBar" type="ColorRect" parent="EnemyCommander"]
+offset_left = -25.0
+offset_top = -30.0
+offset_right = 25.0
+offset_bottom = -25.0
+color = Color(0.2, 1, 0.2, 1)
+
+[node name="HUD" parent="." instance=ExtResource("2")]

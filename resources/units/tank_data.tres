@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3 uid="uid://dpq9n8kx4mjpr3"]
+
+[ext_resource type="Script" path="res://scripts/resources/unit_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+unit_name = "Tank"
+description = "Heavy frontline unit. High health and damage, but slow movement speed."
+visual_color = Color(0.7, 0.3, 0.3, 1)
+max_health = 250.0
+move_speed = 50.0
+attack_damage = 35.0
+attack_range = 50.0
+attack_cooldown = 2.0
+vision_range = 150.0
+energy_cost = 4.0
+visual_size = Vector2(28, 28)
+is_ranged = false
+is_support = false
+heal_amount = 0.0
+heal_range = 0.0
