@@ -1,7 +1,12 @@
-[gd_scene load_steps=27 format=3 uid="uid://caiwqyhaaige4"]
+[gd_scene load_steps=29 format=3 uid="uid://caiwqyhaaige4"]
 
 [ext_resource type="Script" path="res://scripts/player_3d.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/rounded_cube.gd" id="1_pou5i"]
 [ext_resource type="Script" path="res://scripts/camera_3d_follow.gd" id="2_camera"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_ta7nc"]
+agent_height = 1.8
+agent_radius = 0.2
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
 size = Vector3(60, 0.5, 100)
@@ -58,11 +63,11 @@ size = Vector3(15, 6, 15)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_enemy_base"]
 albedo_color = Color(1, 0.2, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_obstacle"]
-size = Vector3(4, 3, 4)
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_obstacle"]
 albedo_color = Color(0.4, 0.4, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_obstacle"]
+size = Vector3(4, 3, 4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_obstacle"]
 size = Vector3(4, 3, 4)
@@ -79,6 +84,9 @@ radius = 1.0
 height = 4.0
 
 [node name="Main3D" type="Node3D"]
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_ta7nc")
 
 [node name="Ground" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
@@ -211,6 +219,8 @@ shape = SubResource("BoxShape3D_base")
 
 [node name="Obstacle1" type="StaticBody3D" parent="Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, 15)
+script = ExtResource("1_pou5i")
+material = SubResource("StandardMaterial3D_obstacle")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle1"]
 mesh = SubResource("BoxMesh_obstacle")
@@ -221,6 +231,8 @@ shape = SubResource("BoxShape3D_obstacle")
 
 [node name="Obstacle2" type="StaticBody3D" parent="Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, 15)
+script = ExtResource("1_pou5i")
+material = SubResource("StandardMaterial3D_obstacle")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle2"]
 mesh = SubResource("BoxMesh_obstacle")
@@ -231,6 +243,8 @@ shape = SubResource("BoxShape3D_obstacle")
 
 [node name="Obstacle3" type="StaticBody3D" parent="Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, -15)
+script = ExtResource("1_pou5i")
+material = SubResource("StandardMaterial3D_obstacle")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle3"]
 mesh = SubResource("BoxMesh_obstacle")
@@ -241,6 +255,8 @@ shape = SubResource("BoxShape3D_obstacle")
 
 [node name="Obstacle4" type="StaticBody3D" parent="Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, -15)
+script = ExtResource("1_pou5i")
+material = SubResource("StandardMaterial3D_obstacle")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle4"]
 mesh = SubResource("BoxMesh_obstacle")
@@ -251,6 +267,8 @@ shape = SubResource("BoxShape3D_obstacle")
 
 [node name="Obstacle5" type="StaticBody3D" parent="Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+script = ExtResource("1_pou5i")
+material = SubResource("StandardMaterial3D_obstacle")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle5"]
 mesh = SubResource("BoxMesh_obstacle")
@@ -269,6 +287,8 @@ surface_material_override/0 = SubResource("StandardMaterial3D_player")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 shape = SubResource("CapsuleShape3D_player")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Player"]
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.642788, 0.766044, 0, -0.766044, 0.642788, 0, 25, 35)
