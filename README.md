@@ -23,8 +23,11 @@ Cosmic Arena is an original sci-fi real-time strategy game where you control a C
 ## How to Run
 
 ### Prerequisites
-- **Godot 4.x** (4.3 or later recommended)
+- **Godot 4.3** (REQUIRED - do not use newer versions without team coordination)
 - Download from: https://godotengine.org/download
+
+### ⚠️ Version Compatibility Warning
+**IMPORTANT FOR COLLABORATORS**: This project is locked to **Godot 4.3**. Opening it in a newer version (4.4, 5.x, etc.) and saving changes will break compatibility for team members using 4.3. Always use the version specified in `.godot-version` file.
 
 ### Opening the Project
 

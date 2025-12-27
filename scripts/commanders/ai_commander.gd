@@ -64,9 +64,9 @@ func patrol_behavior() -> void:
 	if randf() < 0.0025:
 		var capture_point = get_tree().get_first_node_in_group("capture_point")
 		if capture_point and "get_current_owner" in capture_point:
-			var owner = capture_point.get_current_owner()
+			var point_owner = capture_point.get_current_owner()
 			# Move toward capture point if not owned by AI
-			if owner != team:
+			if point_owner != team:
 				target_pos = capture_point.global_position
 			else:
 				# Patrol around home if we own the point
@@ -137,4 +137,3 @@ func get_nearby_enemies() -> Array:
 			enemies.append(body)
 
 	return enemies
-

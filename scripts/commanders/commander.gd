@@ -207,7 +207,7 @@ func ability_aoe_damage(ability: CommanderAbility) -> void:
 			continue
 		if "team" not in enemy or enemy.team == team:
 			continue
-		if global_position.distance_to(enemy.global_position) <= ability.range:
+		if global_position.distance_to(enemy.global_position) <= ability.ability_range:
 			if enemy.has_method("take_damage"):
 				enemy.take_damage(ability.power)
 
@@ -229,7 +229,7 @@ func ability_heal_allies(ability: CommanderAbility) -> void:
 			continue
 		if "team" not in ally or ally.team != team:
 			continue
-		if global_position.distance_to(ally.global_position) <= ability.range:
+		if global_position.distance_to(ally.global_position) <= ability.ability_range:
 			if ally.has_method("heal"):
 				ally.heal(ability.power)
 
@@ -267,8 +267,8 @@ func ability_damage_buff(ability: CommanderAbility) -> void:
 
 func create_ability_visual(ability: CommanderAbility) -> void:
 	var visual = ColorRect.new()
-	visual.custom_minimum_size = Vector2(ability.range * 2, ability.range * 2)
-	visual.position = -Vector2(ability.range, ability.range)
+	visual.custom_minimum_size = Vector2(ability.ability_range * 2, ability.ability_range * 2)
+	visual.position = -Vector2(ability.ability_range, ability.ability_range)
 	visual.color = Color(ability.visual_color.r, ability.visual_color.g, ability.visual_color.b, 0.5)
 	add_child(visual)
 

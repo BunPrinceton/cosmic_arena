@@ -105,11 +105,11 @@ func update_enemy_health(current: float, maximum: float) -> void:
 	if enemy_health_label:
 		enemy_health_label.text = "Enemy Core: %d/%d" % [int(current), int(maximum)]
 
-func update_capture_status(owner: int) -> void:
+func update_capture_status(point_owner: int) -> void:
 	if not capture_status:
 		return
 
-	match owner:
+	match point_owner:
 		-1:  # Neutral
 			capture_status.text = "Objective: Neutral"
 			capture_status.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))

@@ -22,8 +22,8 @@ enum TraitType {
 ## Returns formatted text for UI
 func get_trait_text() -> String:
 	var modifier_percent = int(modifier_value * 100)
-	var sign = "+" if modifier_value >= 0 else ""
-	return "%s: %s%d%%" % [trait_name, sign, modifier_percent]
+	var sign_prefix = "+" if modifier_value >= 0 else ""
+	return "%s: %s%d%%" % [trait_name, sign_prefix, modifier_percent]
 
 ## Applies the trait modifier to a target value
 func apply_modifier(base_value: float) -> float:
@@ -32,5 +32,5 @@ func apply_modifier(base_value: float) -> float:
 ## Gets a human-readable description with the modifier
 func get_full_description() -> String:
 	var modifier_percent = int(modifier_value * 100)
-	var sign = "+" if modifier_value >= 0 else ""
-	return "%s (%s%d%%)\n%s" % [trait_name, sign, modifier_percent, description]
+	var sign_prefix = "+" if modifier_value >= 0 else ""
+	return "%s (%s%d%%)\n%s" % [trait_name, sign_prefix, modifier_percent, description]

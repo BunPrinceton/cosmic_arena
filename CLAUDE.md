@@ -6,19 +6,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Cosmic Arena** is a 1v1 real-time strategy game built with Godot 4.x and GDScript. It features deck-building, commander control, unit deployment, and a neutral capture point objective system.
 
+**CRITICAL VERSION REQUIREMENT**: This project uses **Godot 4.3** exactly (specified in `.godot-version`). Opening in Godot 4.4+ or 5.x will auto-upgrade scene files and break compatibility. See `CONTRIBUTING.md` for details.
+
 ## Running the Game
 
 ```bash
 # Open project in Godot editor
 godot project.godot
 
-# Run directly (headless/play mode)
+# Run the 2D game (default main scene)
 godot --path .
 
-# In Godot editor, press F5 to run
+# Run the 3D prototype scene
+godot --path . scenes/main_3d.tscn
+
+# In Godot editor:
+# - F5: Run main/default scene (2D game)
+# - F6: Run currently open scene (useful for 3D prototype)
 ```
 
-**Entry Point**: Game starts at `scenes/deck_builder.tscn` (configured in project.godot), then transitions to `main.tscn` for the battle.
+**Entry Point**: Game starts at `scenes/deck_builder.tscn` (configured in project.godot), then transitions to `main.tscn` for the 2D battle.
+
+**3D Prototype**: A Force Arena-style 3D scene exists at `scenes/main_3d.tscn` for testing camera angles and battlefield layout. This is NOT integrated with the main game loop yet.
 
 ## Core Architecture
 
@@ -66,9 +75,9 @@ main.gd._ready() reads GameState.player_deck
 Battle begins
 ```
 
-### Camera System (Godot 4.x)
+### Camera System
 
-The camera follows the PlayerCommander using:
+**2D Camera (main.tscn)**: The Camera2D follows the PlayerCommander using:
 - `camera.global_position = player_commander.global_position` (not local position)
 - `anchor_mode = 1` (DRAG_CENTER) to center viewport on camera
 - Camera shake applies offset to follow position
@@ -85,6 +94,28 @@ func _process(delta: float) -> void:
             follow_pos += shake_offset
 
         camera.global_position = follow_pos
+```
+
+**3D Camera (main_3d.tscn)**: Force Arena-style diagonal isometric camera:
+- Script: `scripts/camera_3d_follow.gd`
+- Positioned southeast of player (+X, +Z offset) looking northwest
+- Camera angle: 22° down from horizontal, -122° yaw (facing northwest)
+- Locked follow: `global_position = target.global_position + _offset` in `_physics_process`
+- Uses `look_at(target.global_position, Vector3.UP)` to keep player centered
+- Gameplay settings: `follow_distance=12.5`, `camera_height=7.5`
+- Debug settings (saved in comments): `follow_distance=25.0`, `camera_height=15.0`
+
+```gdscript
+# camera_3d_follow.gd
+func _physics_process(delta: float) -> void:
+    if not target:
+        return
+
+    # Locked follow - camera stays at fixed offset from player
+    global_position = target.global_position + _offset
+
+    # Always look at the player to keep them centered in screen
+    look_at(target.global_position, Vector3.UP)
 ```
 
 ### Signal-Based Communication
@@ -213,6 +244,70 @@ All visual feedback effects are in `docs/GAME_FEEL_IMPROVEMENTS.md`. Key impleme
 ### AI Behavior
 AI commander checks capture point ownership during patrol (0.25% chance per frame) and moves toward it if not owned by AI.
 
+## 3D Prototype Scene (main_3d.tscn)
+
+A standalone 3D scene exists for testing Force Arena-style camera and battlefield layout. **This is NOT integrated with the main 2D game** - it's a separate prototype.
+
+### Scene Structure
+
+- **Ground**: 60×0.5×100 green box at Y=-0.25
+- **3 Lanes**: 8×0.6×100 brown boxes at X=-12, 0, 12 (left, center, right)
+- **Player Base**: 15×6×15 blue box at (0, 3, 50) - bottom of battlefield
+- **Enemy Base**: 15×6×15 red box at (0, 3, -50) - top of battlefield
+- **Obstacles**: 5× 4×3×4 gray boxes positioned along lanes
+- **Boundary Walls**: 6 yellowish-green wall segments (height=3):
+  - 2 full-length side walls at X=±31
+  - 4 top/bottom segments flanking the bases at Z=±51
+- **Backdrop Planes**: 3 bright yellow unshaded walls behind boundaries:
+  - Top: 60×80×1 at (0, 40, -55)
+  - Left: 1×80×100 at (-35, 40, 0)
+  - Right: 1×80×100 at (35, 40, 0)
+
+### Player & Camera
+
+- **Player**: Blue capsule (radius=1, height=4) spawned at (-15, 2, 35)
+- **Movement**: WASD/arrow keys + right-click to move
+- **Camera**: Diagonal isometric view (see Camera System section)
+
+### Visual Orientation
+
+From camera view:
+- Player base appears at **bottom-left** of screen
+- Enemy base appears at **top-right** of screen
+- Battlefield runs diagonally across viewport
+- Camera is southeast of player, looking northwest
+
+### Running the 3D Scene
+
+**CRITICAL**: The 3D scene must be run differently than the 2D game:
+
+```bash
+# Command line
+godot --path . scenes/main_3d.tscn
+
+# In Godot editor
+# 1. Open scenes/main_3d.tscn
+# 2. Press F6 (Run Current Scene) - NOT F5!
+# F5 runs the default main scene (2D game)
+# F6 runs the currently open scene
+```
+
+### Common 3D Issues
+
+**"I ran F5 but it's showing the 2D game"**:
+- Use **F6** to run the current scene, not F5
+- F5 always runs `project.godot`'s configured main scene (deck_builder.tscn → main.tscn)
+
+**"Changes to main_3d.tscn aren't showing up"**:
+- Ensure you're running `scenes/main_3d.tscn` specifically
+- Check that Godot saved your changes (Ctrl+S)
+- Command-line runs may not reflect unsaved editor changes
+
+**"Can't see backdrop planes"**:
+- Verify material has `shading_mode = 0` (unshaded) for brightness
+- Check they're positioned outside the boundary walls
+- Ensure mesh dimensions are correct (thin walls, not cubes)
+
 ## Common Godot 4.x Pitfalls
 
 ### Method Name Conflicts with Node API
@@ -223,17 +318,32 @@ AI commander checks capture point ownership during patrol (0.25% chance per fram
 
 **Example**: `CapturePoint.get_current_owner()` was renamed from `get_owner()` to avoid parser errors.
 
-### Camera2D Anchor Modes
+### Camera2D Anchor Modes (2D scenes only)
 
 - `anchor_mode = 0` (FIXED_TOP_LEFT): Camera position is top-left of viewport
 - `anchor_mode = 1` (DRAG_CENTER): Camera position is center of viewport ← **Use this for follow cameras**
 
 ### Global vs Local Position
 
-When moving Camera2D to follow objects, always use:
+When moving cameras to follow objects, always use global space:
+
 ```gdscript
+# 2D Camera
 camera.global_position = target.global_position  # ✅ Correct
 camera.position = target.position  # ❌ Wrong - local space
+
+# 3D Camera
+camera.global_position = target.global_position + offset  # ✅ Correct
+camera.position = target.position + offset  # ❌ Wrong - local space
+```
+
+### Camera3D Look-At (3D scenes only)
+
+When using Camera3D with `look_at()`, the third parameter is the "up" direction:
+
+```gdscript
+camera.look_at(target.global_position, Vector3.UP)  # ✅ Correct - Y-axis up
+camera.look_at(target.global_position, Vector3.FORWARD)  # ❌ Wrong - camera tilted
 ```
 
 ## Modifying Game Balance

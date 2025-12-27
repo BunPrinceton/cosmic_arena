@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cpq8n4kxw7hjr" path="res://scenes/core.tscn" id="4"]
 [ext_resource type="Script" path="res://scripts/commanders/player_commander.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/commanders/ai_commander.gd" id="6"]
-[ext_resource type="PackedScene" path="res://scenes/capture_point.tscn" id="7"]
+[ext_resource type="PackedScene" uid="uid://bxkts2on4nnvv" path="res://scenes/capture_point.tscn" id="7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(40, 40)

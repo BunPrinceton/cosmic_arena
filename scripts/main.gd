@@ -177,7 +177,7 @@ func deploy_unit(unit_data: UnitData) -> void:
 
 func _process(delta: float) -> void:
 	# Camera follows player commander
-	if player_commander:
+	if player_commander and is_instance_valid(player_commander):
 		var follow_pos = player_commander.global_position
 
 		# Apply camera shake offset if active
