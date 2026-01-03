@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://cm8pqn5kx7hjpr"]
+[gd_scene load_steps=2 format=3 uid="uid://dxkcu06wwf1kh"]
 
 [ext_resource type="Script" path="res://scripts/deck_builder.gd" id="1"]
 
@@ -97,3 +97,8 @@ custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Select 3-6 Units"
+
+[node name="BackButton" type="Button" parent="MarginContainer/HBoxContainer/SelectedDeck"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Back to Menu"

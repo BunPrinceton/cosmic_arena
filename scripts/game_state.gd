@@ -11,10 +11,12 @@ const AVAILABLE_UNITS: Array[UnitData] = [
 	preload("res://resources/units/support_data.tres")
 ]
 
-# Preload all available commanders
+# Preload all available commanders (Light side first, then Dark side)
 const AVAILABLE_COMMANDERS: Array[CommanderData] = [
 	preload("res://resources/commanders/assault_commander.tres"),
-	preload("res://resources/commanders/tactical_commander.tres")
+	preload("res://resources/commanders/tactical_commander.tres"),
+	preload("res://resources/commanders/dark_assault_commander.tres"),
+	preload("res://resources/commanders/dark_tactical_commander.tres")
 ]
 
 # Player's selected deck

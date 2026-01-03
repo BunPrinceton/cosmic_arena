@@ -130,5 +130,5 @@ func _on_game_over(player_won: bool) -> void:
 		game_over_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 
 func _on_restart_pressed() -> void:
-	# Return to deck builder
-	get_tree().change_scene_to_file("res://scenes/deck_builder.tscn")
+	# Return to main menu
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")

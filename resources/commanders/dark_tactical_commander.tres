@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CommanderData" load_steps=4 format=3 uid="uid://dark_tactical_cmd"]
+
+[ext_resource type="Script" path="res://scripts/resources/commander_data.gd" id="1"]
+[ext_resource type="Resource" uid="uid://cm8trait2tactical" path="res://resources/commanders/tactical_trait.tres" id="2"]
+[ext_resource type="Resource" uid="uid://cm8ability2tactical" path="res://resources/commanders/tactical_ability.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+commander_name = "Shadow Lord"
+description = "Cunning dark side commander who manipulates the battlefield."
+visual_color = Color(0.5, 0.2, 0.6, 1)
+portrait_color = Color(0.6, 0.2, 0.7, 1)
+max_health = 520.0
+move_speed = 190.0
+attack_damage = 30.0
+attack_range = 110.0
+attack_cooldown = 1.1
+passive_trait = ExtResource("2")
+active_ability = ExtResource("3")
+visual_size = Vector2(40, 40)

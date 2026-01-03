@@ -8,12 +8,19 @@ var nav_agent: NavigationAgent3D = null
 var move_target: Vector3 = Vector3.ZERO
 var has_move_target: bool = false
 
+# Animation
+var anim_player: AnimationPlayer = null
+var current_anim: String = ""
+
 func _ready() -> void:
 	# Check if NavigationAgent3D exists
 	nav_agent = get_node_or_null("NavigationAgent3D")
 	if nav_agent:
 		# Wait for navigation map to synchronize
 		call_deferred("_setup_navigation")
+
+	# Find AnimationPlayer in the human-female model
+	_setup_animation()
 
 func _setup_navigation() -> void:
 	# Wait for first physics frame so NavigationServer can sync
@@ -27,6 +34,11 @@ func _setup_navigation() -> void:
 		print("To enable smart pathfinding: Add NavigationRegion3D and NavigationAgent3D, then bake the mesh")
 
 func _input(event: InputEvent) -> void:
+	# ESC to return to main menu
+	if event.is_action_pressed("ui_cancel"):
+		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+		return
+
 	# Right-click to move
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
@@ -104,3 +116,57 @@ func _physics_process(delta: float) -> void:
 		velocity.y = 0.0
 
 	move_and_slide()
+
+	# Update animation based on movement
+	_update_animation(direction.length() > 0.1)
+
+func _setup_animation() -> void:
+	# Find AnimationPlayer in the human-female model hierarchy
+	var model = get_node_or_null("human-female")
+	if model:
+		anim_player = model.get_node_or_null("AnimationPlayer")
+		if not anim_player:
+			# Try finding it recursively
+			anim_player = _find_animation_player(model)
+
+		if anim_player:
+			print("Found AnimationPlayer with animations: ", anim_player.get_animation_list())
+		else:
+			print("WARNING: No AnimationPlayer found in human-female model")
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	for child in node.get_children():
+		if child is AnimationPlayer:
+			return child
+		var result = _find_animation_player(child)
+		if result:
+			return result
+	return null
+
+func _update_animation(is_moving: bool) -> void:
+	if not anim_player:
+		return
+
+	var anim_list = anim_player.get_animation_list()
+	var target_anim = ""
+
+	if is_moving:
+		# Use sprint animation for running
+		for name in ["sprint", "run", "Run"]:
+			if name in anim_list:
+				target_anim = name
+				break
+	else:
+		# Use unarmed idle
+		for name in ["idle-unarmed", "idle-2h", "Idle"]:
+			if name in anim_list:
+				target_anim = name
+				break
+
+	if target_anim != "" and target_anim != current_anim:
+		# Set animation to loop for smooth breathing/running
+		var anim = anim_player.get_animation(target_anim)
+		if anim:
+			anim.loop_mode = Animation.LOOP_LINEAR
+		anim_player.play(target_anim)
+		current_anim = target_anim

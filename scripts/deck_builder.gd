@@ -6,6 +6,7 @@ extends Control
 @onready var selected_units_container = $MarginContainer/HBoxContainer/SelectedDeck/ScrollContainer/DeckGrid
 @onready var deck_count_label = $MarginContainer/HBoxContainer/SelectedDeck/DeckCountLabel
 @onready var start_button = $MarginContainer/HBoxContainer/SelectedDeck/StartButton
+@onready var back_button = $MarginContainer/HBoxContainer/SelectedDeck/BackButton
 
 var current_deck: Deck
 var available_units: Array[UnitData]
@@ -29,6 +30,7 @@ func _ready() -> void:
 
 	# Connect signals
 	start_button.pressed.connect(_on_start_pressed)
+	back_button.pressed.connect(_on_back_pressed)
 
 	# Update button state
 	update_start_button()
@@ -123,3 +125,8 @@ func _on_start_pressed() -> void:
 
 	# Load main game scene
 	get_tree().change_scene_to_file("res://main.tscn")
+
+
+func _on_back_pressed() -> void:
+	# Return to main menu
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")

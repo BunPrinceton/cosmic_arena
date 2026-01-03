@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Cosmic Arena"
 config/description="A 1v1 real-time arena strategy game with deck-building"
-run/main_scene="res://scenes/deck_builder.tscn"
+run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
