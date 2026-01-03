@@ -1,8 +1,10 @@
-[gd_scene load_steps=29 format=3 uid="uid://caiwqyhaaige4"]
+[gd_scene load_steps=31 format=3 uid="uid://caiwqyhaaige4"]
 
+[ext_resource type="Texture2D" uid="uid://bad677qsbjcue" path="res://assets/textures/greyish-green-mossy-rock.jpg" id="1_bghdn"]
 [ext_resource type="Script" path="res://scripts/player_3d.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/rounded_cube.gd" id="1_pou5i"]
 [ext_resource type="Script" path="res://scripts/camera_3d_follow.gd" id="2_camera"]
+[ext_resource type="PackedScene" uid="uid://n52i38jd65on" path="res://assets/models/humanoid/human-female.glb" id="4_pgxgn"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_ta7nc"]
 agent_height = 1.8
@@ -27,8 +29,8 @@ albedo_color = Color(0.55, 0.4, 0.25, 1)
 size = Vector3(180, 80, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_backdrop"]
-shading_mode = 0
-albedo_color = Color(1, 1, 0, 1)
+albedo_texture = ExtResource("1_bghdn")
+uv1_scale = Vector3(10, 5, 5)
 
 [sub_resource type="BoxMesh" id="BoxMesh_backdrop_side"]
 size = Vector3(180, 80, 1)
@@ -282,8 +284,70 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 2, 35)
 script = ExtResource("1_player")
 
 [node name="Visual" type="MeshInstance3D" parent="Player"]
+visible = false
 mesh = SubResource("CapsuleMesh_player")
 surface_material_override/0 = SubResource("StandardMaterial3D_player")
+
+[node name="human-female" parent="Player" instance=ExtResource("4_pgxgn")]
+
+[node name="CharacterArmature" parent="Player/human-female" index="0"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -1.74113, 0)
+
+[node name="Skeleton3D" parent="Player/human-female/CharacterArmature" index="0"]
+bones/0/position = Vector3(0.0171422, 0.912817, -0.0050976)
+bones/0/rotation = Quaternion(0.31819, -0.00314925, 0.0437919, 0.94701)
+bones/1/rotation = Quaternion(-0.0647028, -1.2402e-07, -1.01848e-08, 0.997905)
+bones/2/rotation = Quaternion(-0.00794256, 0.0650707, -0.0223421, 0.997599)
+bones/3/rotation = Quaternion(0.191207, 0.200757, 0.03412, 0.960194)
+bones/4/rotation = Quaternion(-0.0638784, -0.139554, -0.00974392, 0.988104)
+bones/5/rotation = Quaternion(-0.189448, -0.138567, -0.0192217, 0.971874)
+bones/6/rotation = Quaternion(-0.611305, -0.31983, -0.335933, 0.641221)
+bones/7/rotation = Quaternion(-0.210178, 0.697942, -0.435414, 0.528315)
+bones/8/rotation = Quaternion(0.714259, 0.151839, -0.00364231, 0.683202)
+bones/9/rotation = Quaternion(0.0268669, -0.00694171, -0.044334, 0.998631)
+bones/10/rotation = Quaternion(0.479236, 0.57657, -0.409345, 0.519938)
+bones/11/rotation = Quaternion(0.62305, -0.0191147, -0.0239744, 0.781581)
+bones/12/rotation = Quaternion(0.623165, -0.0147982, -0.0185665, 0.78173)
+bones/13/rotation = Quaternion(0.448563, 0.552099, -0.441805, 0.546613)
+bones/14/rotation = Quaternion(0.623343, 0.000941957, 0.00118481, 0.781947)
+bones/15/rotation = Quaternion(0.623342, -0.000705536, -0.000881892, 0.781949)
+bones/16/rotation = Quaternion(0.4386, 0.458383, -0.490833, 0.597158)
+bones/17/rotation = Quaternion(0.623285, -0.0159695, 0.0200629, 0.781574)
+bones/18/rotation = Quaternion(0.623344, 0.000377271, 0.000478444, 0.781947)
+bones/19/rotation = Quaternion(0.404778, 0.516138, -0.483328, 0.579785)
+bones/20/rotation = Quaternion(0.623341, 7.29821e-06, 9.4127e-06, 0.78195)
+bones/21/rotation = Quaternion(0.623341, -0.000664898, -0.000833991, 0.781949)
+bones/22/rotation = Quaternion(0.296851, 0.913647, 0.274657, 0.041148)
+bones/23/rotation = Quaternion(0.342998, -0.00139713, -0.0768231, 0.936189)
+bones/24/rotation = Quaternion(0.657116, -0.0554158, -0.0877024, 0.746617)
+bones/26/rotation = Quaternion(-0.60006, 0.340459, 0.357572, 0.629411)
+bones/27/rotation = Quaternion(-0.038446, -0.662672, 0.53496, 0.522691)
+bones/28/rotation = Quaternion(0.759597, 0.258178, -0.215396, 0.556741)
+bones/29/rotation = Quaternion(0.10159, -0.0348607, 0.0489494, 0.99301)
+bones/30/rotation = Quaternion(0.479237, -0.57657, 0.409345, 0.519938)
+bones/31/rotation = Quaternion(0.62305, 0.0191174, 0.0239723, 0.781581)
+bones/32/rotation = Quaternion(0.623164, 0.0147984, 0.0185666, 0.78173)
+bones/33/rotation = Quaternion(0.448564, -0.552099, 0.441805, 0.546613)
+bones/34/rotation = Quaternion(0.623342, -0.000939082, -0.00118685, 0.781948)
+bones/35/rotation = Quaternion(0.623343, 0.000705732, 0.000881738, 0.781948)
+bones/36/rotation = Quaternion(0.438601, -0.458383, 0.490833, 0.597158)
+bones/37/rotation = Quaternion(0.623285, 0.0159722, -0.0200648, 0.781575)
+bones/38/rotation = Quaternion(0.623345, -0.000377371, -0.000478383, 0.781946)
+bones/39/rotation = Quaternion(0.404779, -0.516138, 0.483328, 0.579784)
+bones/40/rotation = Quaternion(0.623341, -4.4083e-06, -1.13635e-05, 0.78195)
+bones/41/rotation = Quaternion(0.623342, 0.000664931, 0.000834089, 0.781949)
+bones/42/rotation = Quaternion(-0.296853, 0.913646, 0.274656, -0.0411511)
+bones/43/rotation = Quaternion(0.342997, 0.00139332, 0.0768246, 0.936189)
+bones/44/rotation = Quaternion(0.657116, 0.0554157, 0.0877025, 0.746616)
+bones/46/rotation = Quaternion(-0.0068379, -0.0231663, 0.958813, -0.283009)
+bones/50/rotation = Quaternion(0.837776, -0.0310053, 0.00819513, 0.545071)
+bones/51/rotation = Quaternion(0.0963989, 0.000159218, 0.0227168, 0.995084)
+bones/52/rotation = Quaternion(-0.326271, 0.00447359, 0.00498613, 0.945252)
+bones/53/rotation = Quaternion(-0.000237434, 0.891866, -0.452299, -0.000463178)
+bones/54/rotation = Quaternion(0.992889, -0.0591052, 0.00750361, 0.10306)
+bones/55/rotation = Quaternion(0.394278, -0.0184423, -0.0159299, 0.918668)
+bones/56/rotation = Quaternion(-0.148373, 0.00830332, 0.00166663, 0.988895)
+bones/57/rotation = Quaternion(0.000238537, 0.891866, -0.452299, 0.000460199)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 shape = SubResource("CapsuleShape3D_player")
@@ -303,3 +367,5 @@ metadata/_edit_lock_ = true
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 30, 0)
 shadow_enabled = true
+
+[editable path="Player/human-female"]
