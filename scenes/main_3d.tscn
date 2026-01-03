@@ -2,8 +2,9 @@
 
 [ext_resource type="Texture2D" uid="uid://bad677qsbjcue" path="res://assets/textures/greyish-green-mossy-rock.jpg" id="1_bghdn"]
 [ext_resource type="Script" path="res://scripts/player_3d.gd" id="1_player"]
-[ext_resource type="Script" path="res://scripts/rounded_cube.gd" id="1_pou5i"]
+[ext_resource type="Texture2D" uid="uid://pjwwk8ccsii5" path="res://assets/textures/grass_mossy.png" id="1_w3v01"]
 [ext_resource type="Script" path="res://scripts/camera_3d_follow.gd" id="2_camera"]
+[ext_resource type="PackedScene" uid="uid://cxyfdrw5xr1q4" path="res://assets/models/environment/rocks/Rock_1.glb" id="2_dn385"]
 [ext_resource type="PackedScene" uid="uid://n52i38jd65on" path="res://assets/models/humanoid/human-female.glb" id="4_pgxgn"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_ta7nc"]
@@ -14,7 +15,9 @@ agent_radius = 0.2
 size = Vector3(60, 0.5, 100)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_color = Color(0.2, 0.25, 0.2, 1)
+albedo_color = Color(0.452586, 0.452586, 0.452586, 1)
+albedo_texture = ExtResource("1_w3v01")
+uv1_scale = Vector3(20, 20, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(60, 0.5, 100)
@@ -65,14 +68,12 @@ size = Vector3(15, 6, 15)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_enemy_base"]
 albedo_color = Color(1, 0.2, 0.2, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_obstacle"]
-albedo_color = Color(0.4, 0.4, 0.4, 1)
+[sub_resource type="BoxShape3D" id="BoxShape3D_rstky"]
+size = Vector3(10, 3, 3)
 
-[sub_resource type="BoxMesh" id="BoxMesh_obstacle"]
-size = Vector3(4, 3, 4)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_obstacle"]
-size = Vector3(4, 3, 4)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qavsd"]
+albedo_texture = ExtResource("1_bghdn")
+uv1_scale = Vector3(2, 2, 2)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_player"]
 radius = 1.0
@@ -104,10 +105,6 @@ shape = SubResource("BoxShape3D_ground")
 
 [node name="LeftLane" type="MeshInstance3D" parent="Lanes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 0)
-mesh = SubResource("BoxMesh_lane")
-surface_material_override/0 = SubResource("StandardMaterial3D_lane")
-
-[node name="CenterLane" type="MeshInstance3D" parent="Lanes"]
 mesh = SubResource("BoxMesh_lane")
 surface_material_override/0 = SubResource("StandardMaterial3D_lane")
 
@@ -219,65 +216,35 @@ shape = SubResource("BoxShape3D_base")
 
 [node name="Obstacles" type="Node3D" parent="."]
 
-[node name="Obstacle1" type="StaticBody3D" parent="Obstacles"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, 15)
-script = ExtResource("1_pou5i")
-material = SubResource("StandardMaterial3D_obstacle")
+[node name="RigidBody3D" type="RigidBody3D" parent="Obstacles"]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle1"]
-mesh = SubResource("BoxMesh_obstacle")
-surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48608, 0)
+shape = SubResource("BoxShape3D_rstky")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/Obstacle1"]
-shape = SubResource("BoxShape3D_obstacle")
+[node name="Rock_12" parent="Obstacles/RigidBody3D" instance=ExtResource("2_dn385")]
+transform = Transform3D(1.06513, 0, 1.69278, 0, 2, 0, -1.69278, 0, 1.06513, -4.42794, -0.0281084, 0.888975)
 
-[node name="Obstacle2" type="StaticBody3D" parent="Obstacles"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, 15)
-script = ExtResource("1_pou5i")
-material = SubResource("StandardMaterial3D_obstacle")
+[node name="Rock_15" parent="Obstacles/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
+transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.775426, 9.53674e-07, 1.6943)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle2"]
-mesh = SubResource("BoxMesh_obstacle")
-surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
+[node name="Rock_1" parent="Obstacles/RigidBody3D/Rock_12/Rock_15" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/Obstacle2"]
-shape = SubResource("BoxShape3D_obstacle")
+[node name="Rock_14" parent="Obstacles/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.652769, 0, 1.03742)
 
-[node name="Obstacle3" type="StaticBody3D" parent="Obstacles"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, -15)
-script = ExtResource("1_pou5i")
-material = SubResource("StandardMaterial3D_obstacle")
+[node name="Rock_1" parent="Obstacles/RigidBody3D/Rock_12/Rock_14" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle3"]
-mesh = SubResource("BoxMesh_obstacle")
-surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
+[node name="Rock_13" parent="Obstacles/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
+transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/Obstacle3"]
-shape = SubResource("BoxShape3D_obstacle")
+[node name="Rock_1" parent="Obstacles/RigidBody3D/Rock_12/Rock_13" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
-[node name="Obstacle4" type="StaticBody3D" parent="Obstacles"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, -15)
-script = ExtResource("1_pou5i")
-material = SubResource("StandardMaterial3D_obstacle")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle4"]
-mesh = SubResource("BoxMesh_obstacle")
-surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/Obstacle4"]
-shape = SubResource("BoxShape3D_obstacle")
-
-[node name="Obstacle5" type="StaticBody3D" parent="Obstacles"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-script = ExtResource("1_pou5i")
-material = SubResource("StandardMaterial3D_obstacle")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/Obstacle5"]
-mesh = SubResource("BoxMesh_obstacle")
-surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/Obstacle5"]
-shape = SubResource("BoxShape3D_obstacle")
+[node name="Rock_1" parent="Obstacles/RigidBody3D/Rock_12" index="3"]
+surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 2, 35)
@@ -294,16 +261,16 @@ surface_material_override/0 = SubResource("StandardMaterial3D_player")
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -1.74113, 0)
 
 [node name="Skeleton3D" parent="Player/human-female/CharacterArmature" index="0"]
-bones/0/position = Vector3(0.0171422, 0.912817, -0.0050976)
-bones/0/rotation = Quaternion(0.31819, -0.00314925, 0.0437919, 0.94701)
+bones/0/position = Vector3(0.0188445, 0.867395, -0.0050473)
+bones/0/rotation = Quaternion(0.318126, -0.00346245, 0.0481469, 0.946819)
 bones/1/rotation = Quaternion(-0.0647028, -1.2402e-07, -1.01848e-08, 0.997905)
-bones/2/rotation = Quaternion(-0.00794256, 0.0650707, -0.0223421, 0.997599)
-bones/3/rotation = Quaternion(0.191207, 0.200757, 0.03412, 0.960194)
-bones/4/rotation = Quaternion(-0.0638784, -0.139554, -0.00974392, 0.988104)
-bones/5/rotation = Quaternion(-0.189448, -0.138567, -0.0192217, 0.971874)
-bones/6/rotation = Quaternion(-0.611305, -0.31983, -0.335933, 0.641221)
-bones/7/rotation = Quaternion(-0.210178, 0.697942, -0.435414, 0.528315)
-bones/8/rotation = Quaternion(0.714259, 0.151839, -0.00364231, 0.683202)
+bones/2/rotation = Quaternion(-0.00688382, 0.0654388, -0.0257625, 0.9975)
+bones/3/rotation = Quaternion(0.193621, 0.20296, 0.0327057, 0.959296)
+bones/4/rotation = Quaternion(-0.0653253, -0.141203, -0.00923137, 0.98778)
+bones/5/rotation = Quaternion(-0.190842, -0.140247, -0.0188226, 0.971368)
+bones/6/rotation = Quaternion(-0.61216, -0.31819, -0.334212, 0.642119)
+bones/7/rotation = Quaternion(-0.211089, 0.705078, -0.406735, 0.541177)
+bones/8/rotation = Quaternion(0.704091, 0.136565, 0.00954215, 0.696788)
 bones/9/rotation = Quaternion(0.0268669, -0.00694171, -0.044334, 0.998631)
 bones/10/rotation = Quaternion(0.479236, 0.57657, -0.409345, 0.519938)
 bones/11/rotation = Quaternion(0.62305, -0.0191147, -0.0239744, 0.781581)
@@ -320,9 +287,9 @@ bones/21/rotation = Quaternion(0.623341, -0.000664898, -0.000833991, 0.781949)
 bones/22/rotation = Quaternion(0.296851, 0.913647, 0.274657, 0.041148)
 bones/23/rotation = Quaternion(0.342998, -0.00139713, -0.0768231, 0.936189)
 bones/24/rotation = Quaternion(0.657116, -0.0554158, -0.0877024, 0.746617)
-bones/26/rotation = Quaternion(-0.60006, 0.340459, 0.357572, 0.629411)
-bones/27/rotation = Quaternion(-0.038446, -0.662672, 0.53496, 0.522691)
-bones/28/rotation = Quaternion(0.759597, 0.258178, -0.215396, 0.556741)
+bones/26/rotation = Quaternion(-0.599039, 0.342253, 0.359453, 0.628338)
+bones/27/rotation = Quaternion(-0.0306716, -0.659449, 0.541661, 0.520375)
+bones/28/rotation = Quaternion(0.758251, 0.275498, -0.234658, 0.542303)
 bones/29/rotation = Quaternion(0.10159, -0.0348607, 0.0489494, 0.99301)
 bones/30/rotation = Quaternion(0.479237, -0.57657, 0.409345, 0.519938)
 bones/31/rotation = Quaternion(0.62305, 0.0191174, 0.0239723, 0.781581)
@@ -340,14 +307,14 @@ bones/42/rotation = Quaternion(-0.296853, 0.913646, 0.274656, -0.0411511)
 bones/43/rotation = Quaternion(0.342997, 0.00139332, 0.0768246, 0.936189)
 bones/44/rotation = Quaternion(0.657116, 0.0554157, 0.0877025, 0.746616)
 bones/46/rotation = Quaternion(-0.0068379, -0.0231663, 0.958813, -0.283009)
-bones/50/rotation = Quaternion(0.837776, -0.0310053, 0.00819513, 0.545071)
-bones/51/rotation = Quaternion(0.0963989, 0.000159218, 0.0227168, 0.995084)
-bones/52/rotation = Quaternion(-0.326271, 0.00447359, 0.00498613, 0.945252)
-bones/53/rotation = Quaternion(-0.000237434, 0.891866, -0.452299, -0.000463178)
-bones/54/rotation = Quaternion(0.992889, -0.0591052, 0.00750361, 0.10306)
-bones/55/rotation = Quaternion(0.394278, -0.0184423, -0.0159299, 0.918668)
-bones/56/rotation = Quaternion(-0.148373, 0.00830332, 0.00166663, 0.988895)
-bones/57/rotation = Quaternion(0.000238537, 0.891866, -0.452299, 0.000460199)
+bones/50/rotation = Quaternion(0.860375, -0.037403, 0.00859327, 0.508215)
+bones/51/rotation = Quaternion(0.00294566, -0.00202057, 0.0220681, 0.99975)
+bones/52/rotation = Quaternion(-0.376207, 0.0213759, 0.0361642, 0.925583)
+bones/53/rotation = Quaternion(-0.000237432, 0.891866, -0.452299, -0.000463204)
+bones/54/rotation = Quaternion(0.969145, -0.0618578, 0.00647425, 0.238514)
+bones/55/rotation = Quaternion(0.587637, -0.0282374, -0.00675066, 0.808604)
+bones/56/rotation = Quaternion(-0.206211, 0.00573884, -0.00241833, 0.978488)
+bones/57/rotation = Quaternion(0.000238562, 0.891866, -0.452299, 0.000460197)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 shape = SubResource("CapsuleShape3D_player")
@@ -368,4 +335,8 @@ metadata/_edit_lock_ = true
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 30, 0)
 shadow_enabled = true
 
+[editable path="Obstacles/RigidBody3D/Rock_12"]
+[editable path="Obstacles/RigidBody3D/Rock_12/Rock_15"]
+[editable path="Obstacles/RigidBody3D/Rock_12/Rock_14"]
+[editable path="Obstacles/RigidBody3D/Rock_12/Rock_13"]
 [editable path="Player/human-female"]
