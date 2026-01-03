@@ -31,7 +31,7 @@ var ai_controller: AIController
 @onready var player_commander = $PlayerCommander
 @onready var enemy_commander = $EnemyCommander
 @onready var capture_point = $CapturePoint
-@onready var camera = $Camera2D
+@onready var camera = $Camera3D
 
 # Camera shake state
 var camera_shake_amount: float = 0.0
@@ -47,9 +47,14 @@ var ai_deck: Deck
 var base_player_energy_regen: float = 1.5
 var base_enemy_energy_regen: float = 1.2
 
+
 func _ready() -> void:
+
 	# Activate camera
 	camera.make_current()
+	var asset_manager = AssetManager.new()
+	asset_manager.load_my_test_glb()
+
 
 	# Initialize unit scene mapping
 	unit_scene_map[GRUNT_DATA] = GRUNT_SCENE
