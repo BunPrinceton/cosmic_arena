@@ -20,7 +20,24 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.1, 0.1, 0.15, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="UIRoot" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="LeftPanelContainer" type="Control" parent="UIRoot"]
+layout_mode = 1
+anchor_right = 0.55
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UIRoot/LeftPanelContainer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,33 +46,30 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 40
 theme_override_constants/margin_top = 40
-theme_override_constants/margin_right = 40
+theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 40
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="AvailableUnits" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="AvailableUnits" type="VBoxContainer" parent="UIRoot/LeftPanelContainer/MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="Label" type="Label" parent="MarginContainer/HBoxContainer/AvailableUnits"]
+[node name="Label" type="Label" parent="UIRoot/LeftPanelContainer/MarginContainer/AvailableUnits"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Available Units"
 horizontal_alignment = 1
 
-[node name="Instructions" type="Label" parent="MarginContainer/HBoxContainer/AvailableUnits"]
+[node name="Instructions" type="Label" parent="UIRoot/LeftPanelContainer/MarginContainer/AvailableUnits"]
 layout_mode = 2
 text = "Click a unit to add it to your deck"
 horizontal_alignment = 1
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/HBoxContainer/AvailableUnits"]
+[node name="ScrollContainer" type="ScrollContainer" parent="UIRoot/LeftPanelContainer/MarginContainer/AvailableUnits"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="UnitGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/AvailableUnits/ScrollContainer"]
+[node name="UnitGrid" type="GridContainer" parent="UIRoot/LeftPanelContainer/MarginContainer/AvailableUnits/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -63,42 +77,64 @@ theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 2
 
-[node name="SelectedDeck" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(400, 0)
-layout_mode = 2
+[node name="RightPanelContainer" type="Control" parent="UIRoot"]
+layout_mode = 1
+anchor_left = 0.55
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="Label" type="Label" parent="MarginContainer/HBoxContainer/SelectedDeck"]
+[node name="MarginContainer" type="MarginContainer" parent="UIRoot/RightPanelContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="SelectedDeck" type="VBoxContainer" parent="UIRoot/RightPanelContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="UIRoot/RightPanelContainer/MarginContainer/SelectedDeck"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Your Deck"
 horizontal_alignment = 1
 
-[node name="DeckCountLabel" type="Label" parent="MarginContainer/HBoxContainer/SelectedDeck"]
+[node name="DeckCountLabel" type="Label" parent="UIRoot/RightPanelContainer/MarginContainer/SelectedDeck"]
 layout_mode = 2
 text = "Deck: 0/6 units"
 horizontal_alignment = 1
 
-[node name="Instructions2" type="Label" parent="MarginContainer/HBoxContainer/SelectedDeck"]
+[node name="Instructions2" type="Label" parent="UIRoot/RightPanelContainer/MarginContainer/SelectedDeck"]
 layout_mode = 2
 text = "Click a unit to remove it from your deck"
 horizontal_alignment = 1
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/HBoxContainer/SelectedDeck"]
+[node name="ScrollContainer" type="ScrollContainer" parent="UIRoot/RightPanelContainer/MarginContainer/SelectedDeck"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="DeckGrid" type="VBoxContainer" parent="MarginContainer/HBoxContainer/SelectedDeck/ScrollContainer"]
+[node name="DeckGrid" type="VBoxContainer" parent="UIRoot/RightPanelContainer/MarginContainer/SelectedDeck/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 5
 
-[node name="StartButton" type="Button" parent="MarginContainer/HBoxContainer/SelectedDeck"]
+[node name="StartButton" type="Button" parent="UIRoot/RightPanelContainer/MarginContainer/SelectedDeck"]
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Select 3-6 Units"
 
-[node name="BackButton" type="Button" parent="MarginContainer/HBoxContainer/SelectedDeck"]
+[node name="BackButton" type="Button" parent="UIRoot/RightPanelContainer/MarginContainer/SelectedDeck"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "Back to Menu"

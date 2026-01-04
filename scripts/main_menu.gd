@@ -103,44 +103,44 @@ func _ready() -> void:
 
 
 func _setup_references() -> void:
-	# Get main containers
-	top_bar = $MainLayout/RightSection/TopBar/HBoxContainer
-	left_sidebar = $MainLayout/LeftSidebar
-	center_area = $MainLayout/RightSection/ContentArea/CenterArea
-	right_panel = $MainLayout/RightSection/ContentArea/RightPanel
-	character_viewport = $MainLayout/RightSection/ContentArea/CenterArea/CharacterViewport
-	commander_name_label = $MainLayout/RightSection/ContentArea/CenterArea/CommanderName
-	character_selector = $MainLayout/RightSection/ContentArea/CenterArea/CharacterSelector
+	# Get main containers - using modular percentage-based layout structure
+	top_bar = $UIRoot/TopBarContainer/TopBar/HBoxContainer
+	left_sidebar = $UIRoot/LeftMenuContainer/LeftSidebar
+	center_area = $UIRoot/MainViewContainer/ContentArea/CenterArea
+	right_panel = $UIRoot/MainViewContainer/ContentArea/RightPanel
+	character_viewport = $UIRoot/MainViewContainer/ContentArea/CenterArea/CharacterViewport
+	commander_name_label = $UIRoot/MainViewContainer/ContentArea/CenterArea/CommanderName
+	character_selector = $UIRoot/MainViewContainer/ContentArea/CenterArea/CharacterSelector
 	coming_soon_popup = $ComingSoonPopup
 
 
 func _setup_top_bar() -> void:
-	# Player info section
-	player_name_label = $MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/NameTitle/PlayerName
-	player_title_label = $MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/NameTitle/PlayerTitle
-	level_label = $MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/LevelRow/LevelLabel
-	xp_bar = $MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/LevelRow/XPBar
-	xp_text_label = $MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/LevelRow/XPText
+	# Player info section - paths updated for modular layout
+	player_name_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/NameTitle/PlayerName
+	player_title_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/NameTitle/PlayerTitle
+	level_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/LevelRow/LevelLabel
+	xp_bar = $UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/LevelRow/XPBar
+	xp_text_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/LevelRow/XPText
 
 	# Rank display
-	rank_name_label = $MainLayout/RightSection/TopBar/HBoxContainer/RankDisplay/RankInfo/RankName
-	tier_label = $MainLayout/RightSection/TopBar/HBoxContainer/RankDisplay/RankInfo/TierRow/TierLabel
-	rank_points_label = $MainLayout/RightSection/TopBar/HBoxContainer/RankDisplay/RankInfo/TierRow/RankPoints
+	rank_name_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/RankDisplay/RankInfo/RankName
+	tier_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/RankDisplay/RankInfo/TierRow/TierLabel
+	rank_points_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/RankDisplay/RankInfo/TierRow/RankPoints
 
 	# Currencies
-	currencies_container = $MainLayout/RightSection/TopBar/HBoxContainer/Currencies
-	credits_label = $MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Credits/CreditsLabel
-	gems_label = $MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gems/GemsLabel
-	gold_label = $MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gold/GoldLabel
+	currencies_container = $UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies
+	credits_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Credits/CreditsLabel
+	gems_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Gems/GemsLabel
+	gold_label = $UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Gold/GoldLabel
 
 	# Connect top bar buttons
-	var friends_btn = $MainLayout/RightSection/TopBar/HBoxContainer/FriendsButton
+	var friends_btn = $UIRoot/TopBarContainer/TopBar/HBoxContainer/FriendsButton
 	friends_btn.pressed.connect(_show_coming_soon)
 
-	var collection_btn = $MainLayout/RightSection/TopBar/HBoxContainer/CollectionButton
+	var collection_btn = $UIRoot/TopBarContainer/TopBar/HBoxContainer/CollectionButton
 	collection_btn.pressed.connect(_show_coming_soon)
 
-	var settings_btn = $MainLayout/RightSection/TopBar/HBoxContainer/SettingsButton
+	var settings_btn = $UIRoot/TopBarContainer/TopBar/HBoxContainer/SettingsButton
 	settings_btn.pressed.connect(_on_settings_pressed)
 
 
@@ -157,7 +157,7 @@ func _setup_navigation() -> void:
 	]
 
 	for item in nav_items:
-		var button = $MainLayout/LeftSidebar.get_node("Nav_" + item.id.capitalize())
+		var button = $UIRoot/LeftMenuContainer/LeftSidebar.get_node("Nav_" + item.id.capitalize())
 		if button:
 			button.set_meta("nav_id", item.id)
 			button.set_meta("nav_enabled", item.enabled)

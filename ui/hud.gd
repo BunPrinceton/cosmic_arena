@@ -2,19 +2,25 @@ extends CanvasLayer
 class_name HUD
 
 ## Main HUD displaying energy, health, and unit deployment buttons
+## Uses modular percentage-based layout for resolution independence
 
-@onready var energy_bar = $MarginContainer/VBoxContainer/EnergyBar
-@onready var energy_label = $MarginContainer/VBoxContainer/EnergyBar/EnergyLabel
-@onready var player_health_bar = $MarginContainer/VBoxContainer/PlayerHealth/HealthBar
-@onready var player_health_label = $MarginContainer/VBoxContainer/PlayerHealth/Label
-@onready var enemy_health_bar = $MarginContainer/VBoxContainer/EnemyHealth/HealthBar
-@onready var enemy_health_label = $MarginContainer/VBoxContainer/EnemyHealth/Label
-@onready var capture_status = $MarginContainer/VBoxContainer/CaptureStatus
-@onready var unit_buttons_container = $MarginContainer/VBoxContainer/UnitButtons
+# Top info area - health bars, energy, capture status
+@onready var energy_bar = $UIRoot/TopInfoContainer/MarginContainer/VBoxContainer/EnergyBar
+@onready var energy_label = $UIRoot/TopInfoContainer/MarginContainer/VBoxContainer/EnergyBar/EnergyLabel
+@onready var player_health_bar = $UIRoot/TopInfoContainer/MarginContainer/VBoxContainer/PlayerHealth/HealthBar
+@onready var player_health_label = $UIRoot/TopInfoContainer/MarginContainer/VBoxContainer/PlayerHealth/Label
+@onready var enemy_health_bar = $UIRoot/TopInfoContainer/MarginContainer/VBoxContainer/EnemyHealth/HealthBar
+@onready var enemy_health_label = $UIRoot/TopInfoContainer/MarginContainer/VBoxContainer/EnemyHealth/Label
+@onready var capture_status = $UIRoot/TopInfoContainer/MarginContainer/VBoxContainer/CaptureStatus
 
-@onready var game_over_panel = $GameOverPanel
-@onready var game_over_label = $GameOverPanel/VBoxContainer/ResultLabel
-@onready var restart_button = $GameOverPanel/VBoxContainer/RestartButton
+# Bottom tray - unit deployment buttons
+@onready var unit_buttons_container = $UIRoot/BottomTrayContainer/MarginContainer/VBoxContainer/UnitButtons
+
+# Game over overlay
+@onready var game_over_container = $UIRoot/GameOverContainer
+@onready var game_over_panel = $UIRoot/GameOverContainer/GameOverPanel
+@onready var game_over_label = $UIRoot/GameOverContainer/GameOverPanel/VBoxContainer/ResultLabel
+@onready var restart_button = $UIRoot/GameOverContainer/GameOverPanel/VBoxContainer/RestartButton
 
 var energy_system: EnergySystem
 var game_manager: GameManager
@@ -25,7 +31,7 @@ var main_scene: Node
 var unit_buttons: Array[Button] = []
 
 func _ready() -> void:
-	game_over_panel.hide()
+	game_over_container.hide()
 
 	if restart_button:
 		restart_button.pressed.connect(_on_restart_pressed)
@@ -121,7 +127,7 @@ func update_capture_status(point_owner: int) -> void:
 			capture_status.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 
 func _on_game_over(player_won: bool) -> void:
-	game_over_panel.show()
+	game_over_container.show()
 	if player_won:
 		game_over_label.text = "VICTORY!"
 		game_over_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))

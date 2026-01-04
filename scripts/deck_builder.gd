@@ -1,12 +1,16 @@
 extends Control
 
 ## Deck builder UI - allows player to select units for their deck
+## Uses modular percentage-based layout for resolution independence
 
-@onready var available_units_container = $MarginContainer/HBoxContainer/AvailableUnits/ScrollContainer/UnitGrid
-@onready var selected_units_container = $MarginContainer/HBoxContainer/SelectedDeck/ScrollContainer/DeckGrid
-@onready var deck_count_label = $MarginContainer/HBoxContainer/SelectedDeck/DeckCountLabel
-@onready var start_button = $MarginContainer/HBoxContainer/SelectedDeck/StartButton
-@onready var back_button = $MarginContainer/HBoxContainer/SelectedDeck/BackButton
+# Left panel - available units
+@onready var available_units_container = $UIRoot/LeftPanelContainer/MarginContainer/AvailableUnits/ScrollContainer/UnitGrid
+
+# Right panel - selected deck
+@onready var selected_units_container = $UIRoot/RightPanelContainer/MarginContainer/SelectedDeck/ScrollContainer/DeckGrid
+@onready var deck_count_label = $UIRoot/RightPanelContainer/MarginContainer/SelectedDeck/DeckCountLabel
+@onready var start_button = $UIRoot/RightPanelContainer/MarginContainer/SelectedDeck/StartButton
+@onready var back_button = $UIRoot/RightPanelContainer/MarginContainer/SelectedDeck/BackButton
 
 var current_deck: Deck
 var available_units: Array[UnitData]

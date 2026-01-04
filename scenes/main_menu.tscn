@@ -24,226 +24,247 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0.08, 0.08, 0.12, 1)
 
-[node name="MainLayout" type="HBoxContainer" parent="."]
+[node name="UIRoot" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 0
+mouse_filter = 2
 
-[node name="LeftSidebar" type="VBoxContainer" parent="MainLayout"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
+[node name="LeftMenuContainer" type="Control" parent="UIRoot"]
+layout_mode = 1
+anchor_right = 0.078
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="LeftSidebar" type="VBoxContainer" parent="UIRoot/LeftMenuContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 2
 
-[node name="Nav_Battle" type="Button" parent="MainLayout/LeftSidebar"]
-custom_minimum_size = Vector2(100, 70)
+[node name="Nav_Battle" type="Button" parent="UIRoot/LeftMenuContainer/LeftSidebar"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "BATTLE"
 
-[node name="Nav_Rewards" type="Button" parent="MainLayout/LeftSidebar"]
-custom_minimum_size = Vector2(100, 70)
+[node name="Nav_Rewards" type="Button" parent="UIRoot/LeftMenuContainer/LeftSidebar"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "REWARDS"
 
-[node name="Nav_Deck" type="Button" parent="MainLayout/LeftSidebar"]
-custom_minimum_size = Vector2(100, 70)
+[node name="Nav_Deck" type="Button" parent="UIRoot/LeftMenuContainer/LeftSidebar"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "DECK"
 
-[node name="Nav_Shop" type="Button" parent="MainLayout/LeftSidebar"]
-custom_minimum_size = Vector2(100, 70)
+[node name="Nav_Shop" type="Button" parent="UIRoot/LeftMenuContainer/LeftSidebar"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "SHOP"
 
-[node name="Nav_Trade" type="Button" parent="MainLayout/LeftSidebar"]
-custom_minimum_size = Vector2(100, 70)
+[node name="Nav_Trade" type="Button" parent="UIRoot/LeftMenuContainer/LeftSidebar"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "TRADE"
 
-[node name="Nav_Guild" type="Button" parent="MainLayout/LeftSidebar"]
-custom_minimum_size = Vector2(100, 70)
+[node name="Nav_Guild" type="Button" parent="UIRoot/LeftMenuContainer/LeftSidebar"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "GUILD"
 
-[node name="RightSection" type="VBoxContainer" parent="MainLayout"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 0
+[node name="TopBarContainer" type="Control" parent="UIRoot"]
+layout_mode = 1
+anchor_left = 0.078
+anchor_right = 1.0
+anchor_bottom = 0.07
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="TopBar" type="MarginContainer" parent="MainLayout/RightSection"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
+[node name="TopBar" type="MarginContainer" parent="UIRoot/TopBarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 5
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MainLayout/RightSection/TopBar"]
+[node name="HBoxContainer" type="HBoxContainer" parent="UIRoot/TopBarContainer/TopBar"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 15
 
-[node name="PlayerInfo" type="VBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer"]
+[node name="PlayerInfo" type="VBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_constants/separation = 2
 
-[node name="NameTitle" type="HBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo"]
+[node name="NameTitle" type="HBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PlayerName" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/NameTitle"]
+[node name="PlayerName" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/NameTitle"]
 layout_mode = 2
 text = "Commander"
 theme_override_font_sizes/font_size = 16
 
-[node name="Separator" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/NameTitle"]
+[node name="Separator" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/NameTitle"]
 layout_mode = 2
 text = "|"
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 
-[node name="PlayerTitle" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/NameTitle"]
+[node name="PlayerTitle" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/NameTitle"]
 layout_mode = 2
 text = "Rookie"
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 
-[node name="LevelRow" type="HBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo"]
+[node name="LevelRow" type="HBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="LevelLabel" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/LevelRow"]
+[node name="LevelLabel" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/LevelRow"]
 layout_mode = 2
 text = "Lv. 8"
 theme_override_font_sizes/font_size = 12
 
-[node name="XPBar" type="ProgressBar" parent="MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/LevelRow"]
+[node name="XPBar" type="ProgressBar" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/LevelRow"]
 custom_minimum_size = Vector2(120, 10)
 layout_mode = 2
 size_flags_vertical = 4
 value = 45.0
 show_percentage = false
 
-[node name="XPText" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/PlayerInfo/LevelRow"]
+[node name="XPText" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/PlayerInfo/LevelRow"]
 layout_mode = 2
 text = "450 / 1000"
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
 theme_override_font_sizes/font_size = 10
 
-[node name="RankDisplay" type="HBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer"]
+[node name="RankDisplay" type="HBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_constants/separation = 8
 
-[node name="RankEmblem" type="ColorRect" parent="MainLayout/RightSection/TopBar/HBoxContainer/RankDisplay"]
+[node name="RankEmblem" type="ColorRect" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/RankDisplay"]
 custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
 size_flags_vertical = 4
 color = Color(0.7, 0.5, 0.2, 1)
 
-[node name="RankInfo" type="VBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer/RankDisplay"]
+[node name="RankInfo" type="VBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/RankDisplay"]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="RankName" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/RankDisplay/RankInfo"]
+[node name="RankName" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/RankDisplay/RankInfo"]
 layout_mode = 2
 text = "BRONZIUM"
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_font_sizes/font_size = 12
 
-[node name="TierRow" type="HBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer/RankDisplay/RankInfo"]
+[node name="TierRow" type="HBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/RankDisplay/RankInfo"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TierLabel" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/RankDisplay/RankInfo/TierRow"]
+[node name="TierLabel" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/RankDisplay/RankInfo/TierRow"]
 layout_mode = 2
 text = "TIER 4"
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_font_sizes/font_size = 11
 
-[node name="RankPoints" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/RankDisplay/RankInfo/TierRow"]
+[node name="RankPoints" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/RankDisplay/RankInfo/TierRow"]
 layout_mode = 2
 text = "1491"
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 11
 
-[node name="Spacer" type="Control" parent="MainLayout/RightSection/TopBar/HBoxContainer"]
+[node name="Spacer" type="Control" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Currencies" type="HBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer"]
+[node name="Currencies" type="HBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_constants/separation = 20
 
-[node name="Credits" type="HBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies"]
+[node name="Credits" type="HBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies"]
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="CreditsIcon" type="ColorRect" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Credits"]
+[node name="CreditsIcon" type="ColorRect" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Credits"]
 custom_minimum_size = Vector2(22, 22)
 layout_mode = 2
 size_flags_vertical = 4
 color = Color(0.8, 0.4, 0.2, 1)
 
-[node name="CreditsLabel" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Credits"]
+[node name="CreditsLabel" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Credits"]
 layout_mode = 2
 size_flags_vertical = 1
 text = "1,500"
 theme_override_colors/font_color = Color(1, 0.7, 0.4, 1)
 
-[node name="Gems" type="HBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies"]
+[node name="Gems" type="HBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies"]
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="GemIcon" type="ColorRect" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gems"]
+[node name="GemIcon" type="ColorRect" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Gems"]
 custom_minimum_size = Vector2(22, 22)
 layout_mode = 2
 size_flags_vertical = 4
 color = Color(0.3, 0.6, 0.9, 1)
 
-[node name="GemsLabel" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gems"]
+[node name="GemsLabel" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Gems"]
 layout_mode = 2
 size_flags_vertical = 1
 text = "361"
 theme_override_colors/font_color = Color(0.5, 0.8, 1, 1)
 
-[node name="AddGemsBtn" type="Button" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gems"]
+[node name="AddGemsBtn" type="Button" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Gems"]
 custom_minimum_size = Vector2(22, 22)
 layout_mode = 2
 size_flags_vertical = 4
 text = "+"
 
-[node name="Gold" type="HBoxContainer" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies"]
+[node name="Gold" type="HBoxContainer" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies"]
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="GoldIcon" type="ColorRect" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gold"]
+[node name="GoldIcon" type="ColorRect" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Gold"]
 custom_minimum_size = Vector2(22, 22)
 layout_mode = 2
 size_flags_vertical = 4
 color = Color(1, 0.85, 0.2, 1)
 
-[node name="GoldLabel" type="Label" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gold"]
+[node name="GoldLabel" type="Label" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Gold"]
 layout_mode = 2
 size_flags_vertical = 1
 text = "7,620"
 theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
 
-[node name="AddGoldBtn" type="Button" parent="MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gold"]
+[node name="AddGoldBtn" type="Button" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer/Currencies/Gold"]
 custom_minimum_size = Vector2(22, 22)
 layout_mode = 2
 size_flags_vertical = 4
 text = "+"
 
-[node name="FriendsButton" type="Button" parent="MainLayout/RightSection/TopBar/HBoxContainer"]
+[node name="FriendsButton" type="Button" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer"]
 custom_minimum_size = Vector2(35, 35)
 layout_mode = 2
 size_flags_vertical = 4
@@ -251,7 +272,7 @@ tooltip_text = "Friends"
 text = "F"
 flat = true
 
-[node name="CollectionButton" type="Button" parent="MainLayout/RightSection/TopBar/HBoxContainer"]
+[node name="CollectionButton" type="Button" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer"]
 custom_minimum_size = Vector2(35, 35)
 layout_mode = 2
 size_flags_vertical = 4
@@ -259,7 +280,7 @@ tooltip_text = "Card Collection"
 text = "C"
 flat = true
 
-[node name="SettingsButton" type="Button" parent="MainLayout/RightSection/TopBar/HBoxContainer"]
+[node name="SettingsButton" type="Button" parent="UIRoot/TopBarContainer/TopBar/HBoxContainer"]
 custom_minimum_size = Vector2(35, 35)
 layout_mode = 2
 size_flags_vertical = 4
@@ -267,52 +288,65 @@ tooltip_text = "Settings"
 text = "="
 flat = true
 
-[node name="ContentArea" type="HBoxContainer" parent="MainLayout/RightSection"]
-layout_mode = 2
-size_flags_vertical = 3
+[node name="MainViewContainer" type="Control" parent="UIRoot"]
+layout_mode = 1
+anchor_left = 0.078
+anchor_top = 0.07
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="CenterArea" type="VBoxContainer" parent="MainLayout/RightSection/ContentArea"]
+[node name="ContentArea" type="HBoxContainer" parent="UIRoot/MainViewContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterArea" type="VBoxContainer" parent="UIRoot/MainViewContainer/ContentArea"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
 alignment = 1
 
-[node name="CharacterViewport" type="SubViewportContainer" parent="MainLayout/RightSection/ContentArea/CenterArea"]
-custom_minimum_size = Vector2(500, 500)
+[node name="CharacterViewport" type="SubViewportContainer" parent="UIRoot/MainViewContainer/ContentArea/CenterArea"]
 layout_mode = 2
 size_flags_horizontal = 4
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.85
 stretch = true
 
-[node name="SubViewport" parent="MainLayout/RightSection/ContentArea/CenterArea/CharacterViewport" instance=ExtResource("2_viewport")]
+[node name="SubViewport" parent="UIRoot/MainViewContainer/ContentArea/CenterArea/CharacterViewport" instance=ExtResource("2_viewport")]
 
-[node name="CommanderName" type="Label" parent="MainLayout/RightSection/ContentArea/CenterArea"]
+[node name="CommanderName" type="Label" parent="UIRoot/MainViewContainer/ContentArea/CenterArea"]
 layout_mode = 2
 text = "THE GRAND INQUISITOR"
 horizontal_alignment = 1
 theme_override_colors/font_color = Color(1, 0.3, 0.2, 1)
 theme_override_font_sizes/font_size = 28
 
-[node name="CharacterSelector" type="HBoxContainer" parent="MainLayout/RightSection/ContentArea/CenterArea"]
+[node name="CharacterSelector" type="HBoxContainer" parent="UIRoot/MainViewContainer/ContentArea/CenterArea"]
 layout_mode = 2
 size_flags_horizontal = 4
 alignment = 1
 theme_override_constants/separation = 15
 
-[node name="RightPanel" type="VBoxContainer" parent="MainLayout/RightSection/ContentArea"]
-custom_minimum_size = Vector2(320, 0)
+[node name="RightPanel" type="VBoxContainer" parent="UIRoot/MainViewContainer/ContentArea"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 1.0
+size_flags_stretch_ratio = 0.35
 theme_override_constants/separation = 8
 
-[node name="Mode_1v1" type="Panel" parent="MainLayout/RightSection/ContentArea/RightPanel"]
-custom_minimum_size = Vector2(0, 120)
+[node name="Mode_1v1" type="Panel" parent="UIRoot/MainViewContainer/ContentArea/RightPanel"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="Label" type="Label" parent="MainLayout/RightSection/ContentArea/RightPanel/Mode_1v1"]
+[node name="Label" type="Label" parent="UIRoot/MainViewContainer/ContentArea/RightPanel/Mode_1v1"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -322,14 +356,13 @@ horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 28
 
-[node name="Mode_2vs2" type="Panel" parent="MainLayout/RightSection/ContentArea/RightPanel"]
-custom_minimum_size = Vector2(0, 120)
+[node name="Mode_2vs2" type="Panel" parent="UIRoot/MainViewContainer/ContentArea/RightPanel"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="Label" type="Label" parent="MainLayout/RightSection/ContentArea/RightPanel/Mode_2vs2"]
+[node name="Label" type="Label" parent="UIRoot/MainViewContainer/ContentArea/RightPanel/Mode_2vs2"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -339,20 +372,19 @@ horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 28
 
-[node name="BottomModes" type="HBoxContainer" parent="MainLayout/RightSection/ContentArea/RightPanel"]
+[node name="BottomModes" type="HBoxContainer" parent="UIRoot/MainViewContainer/ContentArea/RightPanel"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="Mode_TeamUp" type="Panel" parent="MainLayout/RightSection/ContentArea/RightPanel/BottomModes"]
-custom_minimum_size = Vector2(0, 100)
+[node name="Mode_TeamUp" type="Panel" parent="UIRoot/MainViewContainer/ContentArea/RightPanel/BottomModes"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="Label" type="Label" parent="MainLayout/RightSection/ContentArea/RightPanel/BottomModes/Mode_TeamUp"]
+[node name="Label" type="Label" parent="UIRoot/MainViewContainer/ContentArea/RightPanel/BottomModes/Mode_TeamUp"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -363,14 +395,13 @@ horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 18
 
-[node name="Mode_Training" type="Panel" parent="MainLayout/RightSection/ContentArea/RightPanel/BottomModes"]
-custom_minimum_size = Vector2(0, 100)
+[node name="Mode_Training" type="Panel" parent="UIRoot/MainViewContainer/ContentArea/RightPanel/BottomModes"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="Label" type="Label" parent="MainLayout/RightSection/ContentArea/RightPanel/BottomModes/Mode_Training"]
+[node name="Label" type="Label" parent="UIRoot/MainViewContainer/ContentArea/RightPanel/BottomModes/Mode_Training"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

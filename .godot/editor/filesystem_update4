@@ -1,1 +1,3 @@
 res://scenes/main_3d.tscn
+res://scenes/enemy_base.gd
+res://scenes/mesh_instance_3d.gd
