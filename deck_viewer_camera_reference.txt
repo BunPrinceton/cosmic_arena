@@ -1,0 +1,293 @@
+================================================================================
+DECK VIEWER CAMERA - CODE REFERENCE
+================================================================================
+
+FILE HIERARCHY
+--------------
+cosmic_arena/
+├── scenes/
+│   ├── main_menu.tscn              # Main menu scene
+│   └── ui/
+│       └── character_viewport.tscn  # 3D character SubViewport scene
+│           ├── SubViewport
+│           │   ├── CharacterSlot (Node3D)  # Where character model is parented
+│           │   ├── Camera3D                 # The camera we're adjusting
+│           │   ├── DirectionalLight3D
+│           │   └── WorldEnvironment
+│           └── (SubViewportContainer wrapper in main_menu.tscn)
+│
+└── scripts/
+    ├── main_menu.gd                 # Controls deck view transitions
+    └── ui/
+        └── character_viewport.gd    # Camera zoom/position logic
+
+
+================================================================================
+FILE: scripts/ui/character_viewport.gd
+================================================================================
+
+extends SubViewport
+
+## 3D character display for main menu
+## Renders selected commander model with idle animation
+
+const HUMAN_FEMALE_MODEL = preload("res://assets/models/humanoid/human-female.glb")
+
+# Camera positions for different views
+const CAMERA_BATTLE_POS = Vector3(0, 1.0, 5.0)  # Default full body view
+const CAMERA_DECK_POS = Vector3(0, 1.6, 1.8)  # Deck view - tight close up on upper body/face
+const CAMERA_ZOOM_DURATION = 0.4
+
+@onready var character_slot: Node3D = $CharacterSlot
+@onready var camera: Camera3D = $Camera3D
+
+var current_character: Node3D = null
+var anim_player: AnimationPlayer = null
+var is_zoomed_in: bool = false
+
+
+func _ready() -> void:
+	# Load default character on startup
+	call_deferred("_load_default_character")
+
+
+func _load_default_character() -> void:
+	var instance = HUMAN_FEMALE_MODEL.instantiate()
+	_set_character_instance(instance)
+
+
+func _set_character_instance(instance: Node3D) -> void:
+	# Remove existing character
+	if current_character:
+		current_character.queue_free()
+
+	current_character = instance
+	character_slot.add_child(instance)
+
+	# Scale and position for portrait view
+	# Find the armature and scale it
+	var armature = instance.get_node_or_null("CharacterArmature")
+	if armature:
+		armature.scale = Vector3(1.8, 1.8, 1.8)
+		armature.position = Vector3(0, -1.5, 0)
+
+	# Find animation player
+	anim_player = _find_animation_player(instance)
+
+	# Play idle animation
+	_play_idle_animation()
+
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	for child in node.get_children():
+		if child is AnimationPlayer:
+			return child
+		var result = _find_animation_player(child)
+		if result:
+			return result
+	return null
+
+
+func _play_idle_animation() -> void:
+	if not anim_player:
+		return
+
+	var anim_list = anim_player.get_animation_list()
+	# Try idle animations in order of preference
+	for anim_name in ["idle-unarmed", "idle-2h", "idle-1h", "Idle", "idle"]:
+		if anim_name in anim_list:
+			# Set animation to loop for breathing effect
+			var anim = anim_player.get_animation(anim_name)
+			if anim:
+				anim.loop_mode = Animation.LOOP_LINEAR
+			anim_player.play(anim_name)
+			return
+
+
+## Called when commander selection changes
+func set_commander(commander_data) -> void:
+	# For now, all commanders use the same model
+	# Apply commander's visual color as a tint
+	if current_character and commander_data:
+		_apply_commander_color(commander_data.visual_color)
+
+
+func _apply_commander_color(color: Color) -> void:
+	# Tint the character mesh with commander color
+	# This is subtle - mainly affects outfit/armor areas
+	pass  # Skip tinting for now to keep natural model appearance
+
+
+## Zoom camera in for deck view
+func zoom_in_for_deck() -> void:
+	if is_zoomed_in:
+		return
+	is_zoomed_in = true
+
+	var tween = create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.tween_property(camera, "position", CAMERA_DECK_POS, CAMERA_ZOOM_DURATION)
+
+
+## Zoom camera out for battle view
+func zoom_out_for_battle() -> void:
+	if not is_zoomed_in:
+		return
+	is_zoomed_in = false
+
+	var tween = create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.tween_property(camera, "position", CAMERA_BATTLE_POS, CAMERA_ZOOM_DURATION)
+
+
+## Set camera zoom directly (for immediate changes)
+func set_zoom(zoomed_in: bool) -> void:
+	is_zoomed_in = zoomed_in
+	camera.position = CAMERA_DECK_POS if zoomed_in else CAMERA_BATTLE_POS
+
+
+================================================================================
+FILE: scripts/main_menu.gd (RELEVANT SECTIONS ONLY)
+================================================================================
+
+# --- VARIABLES (around line 43) ---
+
+var currencies_container: Control  # For positioning viewport under currencies
+
+
+# --- SETUP (around line 130) ---
+
+func _setup_top_bar() -> void:
+	# ... other setup ...
+
+	# Currencies
+	currencies_container = $MainLayout/RightSection/TopBar/HBoxContainer/Currencies
+	credits_label = $MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Credits/CreditsLabel
+	gems_label = $MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gems/GemsLabel
+	gold_label = $MainLayout/RightSection/TopBar/HBoxContainer/Currencies/Gold/GoldLabel
+
+
+# --- TRANSITION TO DECK VIEW (around line 1277) ---
+
+func _transition_to_deck() -> void:
+	if is_transitioning:
+		return
+	is_transitioning = true
+	current_view = "deck"
+
+	# Populate deck cards
+	_populate_deck_cards()
+
+	# Reparent commander name and selector to deck_panel so VBoxContainer doesn't control them
+	if commander_name_label and commander_name_label.get_parent() == center_area:
+		var global_pos = commander_name_label.global_position
+		commander_name_label.reparent(deck_panel)
+		commander_name_label.global_position = global_pos
+
+	if character_selector and character_selector.get_parent() == center_area:
+		var global_pos = character_selector.global_position
+		character_selector.reparent(deck_panel)
+		character_selector.global_position = global_pos
+
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_CUBIC)
+
+	# Fade out right panel (game modes)
+	tween.tween_property(right_panel, "modulate:a", 0.0, TRANSITION_DURATION)
+
+	# Fade in deck panel
+	tween.tween_property(deck_panel, "modulate:a", 1.0, TRANSITION_DURATION)
+
+	# Zoom in the 3D character
+	var viewport = character_viewport.get_node_or_null("SubViewport")
+	if viewport and viewport.has_method("zoom_in_for_deck"):
+		viewport.zoom_in_for_deck()
+
+	# Reparent viewport to main control so we can move it freely (not deck_panel which fades)
+	if character_viewport and character_viewport.get_parent() == center_area:
+		var global_pos = character_viewport.global_position
+		character_viewport.reparent(self)
+		character_viewport.global_position = global_pos
+		# Set z_index above background (0) but below deck UI (10)
+		character_viewport.z_index = 1
+
+	# Move the viewport to the right side of the screen (aligned with gold currency)
+	if character_viewport and currencies_container:
+		var screen_size = get_viewport_rect().size
+		# Get currencies position - align with left side (gold currency area)
+		var currencies_left_x = currencies_container.global_position.x
+		var currencies_bottom = currencies_container.global_position.y + currencies_container.size.y
+
+		# Scale viewport size based on screen height for responsiveness
+		var viewport_height = screen_size.y * 0.65  # 65% of screen height
+		var viewport_width = viewport_height * 0.85  # Maintain aspect ratio
+
+		# Position viewport aligned with gold/left currency
+		# Shift left by 150 pixels from center alignment
+		var target_x = currencies_left_x - (viewport_width * 0.3)  # Align more to left/gold currency
+		var target_y = currencies_bottom + 10  # Small gap below currencies
+
+		tween.tween_property(character_viewport, "global_position", Vector2(target_x, target_y), TRANSITION_DURATION)
+		tween.tween_property(character_viewport, "custom_minimum_size", Vector2(viewport_width, viewport_height), TRANSITION_DURATION)
+
+	# Move commander name and selector UP and LEFT into the empty space above cards
+	if commander_name_label:
+		tween.tween_property(commander_name_label, "global_position", Vector2(130, 180), TRANSITION_DURATION)
+		tween.tween_property(commander_name_label, "horizontal_alignment", HORIZONTAL_ALIGNMENT_LEFT, 0.01)
+
+	if character_selector:
+		tween.tween_property(character_selector, "global_position", Vector2(200, 340), TRANSITION_DURATION)
+
+	# Finish transition
+	tween.chain().tween_callback(func():
+		right_panel.visible = false
+		is_transitioning = false
+	)
+
+
+================================================================================
+CURRENT ISSUE
+================================================================================
+
+The camera in deck view (CAMERA_DECK_POS) is positioned at:
+  - X: 0 (centered on character)
+  - Y: 1.6 (looking at upper chest/neck area)
+  - Z: 1.8 (close to character)
+
+The character model has:
+  - Armature scale: Vector3(1.8, 1.8, 1.8)
+  - Armature position: Vector3(0, -1.5, 0)
+
+PROBLEM: Camera can only see down to the elbows, not the belt/torso area.
+
+ATTEMPTED SOLUTIONS:
+1. FOV change (55 degrees) - caused character to appear unzoomed/smaller
+
+POSSIBLE SOLUTIONS TO TRY:
+1. Move camera back (increase Z from 1.8 to ~2.2-2.5)
+2. Lower camera Y position (from 1.6 to ~1.3-1.4)
+3. Adjust character armature position (raise it up, less negative Y)
+4. Combination of above
+
+
+================================================================================
+SCENE STRUCTURE: character_viewport.tscn
+================================================================================
+
+SubViewport (character_viewport.gd attached)
+├── CharacterSlot (Node3D) - empty, characters instanced here at runtime
+│   └── [human-female.glb instance]
+│       └── CharacterArmature (scaled 1.8x, positioned at Y=-1.5)
+│           └── Skeleton3D
+│               └── Meshes...
+├── Camera3D
+│   - Position: (0, 1.0, 5.0) default / (0, 1.6, 1.8) deck view
+│   - FOV: 40 (scene default, not changed in code)
+│   - Looking at origin (0, 0, 0)
+├── DirectionalLight3D
+└── WorldEnvironment
+

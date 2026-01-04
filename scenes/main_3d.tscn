@@ -225,6 +225,9 @@ shape = SubResource("BoxShape3D_rstky")
 [node name="Rock_12" parent="Obstacles/RigidBody3D" instance=ExtResource("2_dn385")]
 transform = Transform3D(1.06513, 0, 1.69278, 0, 2, 0, -1.69278, 0, 1.06513, -4.42794, -0.0281084, 0.888975)
 
+[node name="Rock_1" parent="Obstacles/RigidBody3D/Rock_12" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
+
 [node name="Rock_15" parent="Obstacles/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
 transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.775426, 9.53674e-07, 1.6943)
 
@@ -241,9 +244,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
 
 [node name="Rock_1" parent="Obstacles/RigidBody3D/Rock_12/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_1" parent="Obstacles/RigidBody3D/Rock_12" index="3"]
 surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
 [node name="Player" type="CharacterBody3D" parent="."]

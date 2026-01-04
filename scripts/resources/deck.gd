@@ -7,8 +7,9 @@ class_name Deck
 @export var deck_name: String = "My Deck"
 @export var units: Array[UnitData] = []
 
-const MAX_DECK_SIZE: int = 6
+const MAX_DECK_SIZE: int = 7  # 1 special unit + 6 support units (commander shown separately)
 const MIN_DECK_SIZE: int = 3
+const SUPPORT_SLOTS: int = 6  # Number of regular support unit slots
 
 ## Validates that the deck meets requirements
 func is_valid() -> bool:

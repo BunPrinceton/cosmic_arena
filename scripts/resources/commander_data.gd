@@ -23,6 +23,9 @@ class_name CommanderData
 @export_group("Active Ability")
 @export var active_ability: CommanderAbility
 
+@export_group("Special Unit")
+@export var special_unit: UnitData  # Commander's unique special unit
+
 @export_group("Visual")
 @export var visual_size: Vector2 = Vector2(40, 40)
 

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(timeout 8 godot:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd Force Arena-style main menu UI\n\n- Create main menu scene with left sidebar navigation \\(Battle, Rewards, Deck, Shop, Trade, Guild\\)\n- Implement inverted selection style \\(white bg/black text when selected\\)\n- Add top bar with player info, rank display, and currencies\n- Add rank display with emblem, tier name, tier level, and rank points\n- Create 3D character viewport with idle animation looping\n- Add commander selector with 4 commanders \\(2 light, 2 dark factions\\)\n- Create dark side commanders \\(Dark Enforcer, Shadow Lord\\)\n- Add PlayerData resource for player progression tracking\n- Implement game mode buttons \\(1v1, 2vs2, Team Up, Training\\)\n- Update game flow: Main Menu -> 3D battle, ESC to return\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)"
+    ]
+  }
+}
