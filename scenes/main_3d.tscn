@@ -188,8 +188,6 @@ navigation_mesh = SubResource("NavigationMesh_ta7nc")
 
 [node name="Ground" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
-collision_layer = 2
-collision_mask = 1
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
 mesh = SubResource("BoxMesh_ground")
@@ -481,8 +479,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.1129, 0.5, -13.2396)
 
 [node name="RigidBody3D" type="RigidBody3D" parent="Ground/wall-trees-rocks/NormalTree_35"]
 transform = Transform3D(0.0398005, 0, 0.999208, 0, 1, 0, -0.999208, 0, 0.0398005, -0.398205, 0, -5.01993)
-collision_layer = 1
-collision_mask = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48608, 0)
@@ -636,8 +632,6 @@ transform = Transform3D(0.939434, -0.325714, -0.106648, 0.210325, 0.793576, -0.5
 surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
 [node name="RigidBody3D" type="RigidBody3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D"]
-collision_layer = 1
-collision_mask = 2
 transform = Transform3D(1, 0, -3.72529e-09, 0, 1, 0, 3.72529e-09, 0, 1, 9.68666, 0, -0.144863)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D"]
@@ -791,8 +785,6 @@ transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585
 surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
 [node name="RigidBody3D" type="RigidBody3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D"]
-collision_layer = 1
-collision_mask = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.50875, 0, -0.378754)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D"]
@@ -944,8 +936,6 @@ transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585
 surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
 [node name="RigidBody3D" type="RigidBody3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D"]
-collision_layer = 1
-collision_mask = 2
 transform = Transform3D(0.996859, 0, 0.0791724, 0, 1.77957, 0, -0.0791724, 0, 0.996859, 9.56954, -9.53674e-07, -0.600792)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D"]
@@ -4209,8 +4199,6 @@ shape = SubResource("BoxShape3D_base")
 [node name="Obstacles" type="Node3D" parent="."]
 
 [node name="RigidBody3D" type="RigidBody3D" parent="Obstacles"]
-collision_layer = 1
-collision_mask = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/RigidBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48608, 0)
@@ -4355,8 +4343,6 @@ transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585
 surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
 [node name="RigidBody3D3" type="RigidBody3D" parent="Obstacles"]
-collision_layer = 1
-collision_mask = 2
 transform = Transform3D(-0.0674232, 0, -0.997724, 0, 1, 0, 0.997724, 0, -0.0674232, 31.5313, 0, -36.9051)
 
 [node name="Rock_12" parent="Obstacles/RigidBody3D3" instance=ExtResource("2_dn385")]
@@ -4696,8 +4682,6 @@ transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585
 surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
 [node name="RigidBody3D2" type="RigidBody3D" parent="Obstacles"]
-collision_layer = 1
-collision_mask = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 17.5)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/RigidBody3D2"]
@@ -4843,8 +4827,6 @@ transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585
 surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
 [node name="RigidBody3D" type="RigidBody3D" parent="Obstacles/RigidBody3D2"]
-collision_layer = 1
-collision_mask = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -32.5)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/RigidBody3D2/RigidBody3D"]
