@@ -9,6 +9,7 @@ signal base_destroyed(base: Base3D)
 @export var max_health: float = 1000.0
 @export var team: int = 0  # 0 = player, 1 = enemy
 @export var hp_bar_height: float = 8.0  # Height above base for HP bar
+@export var hp_bar_z_offset: float = 6.0  # Distance to move HP bar toward center (out of castle mesh)
 @export var chunk_count: int = 20  # Number of chunks (1000 HP / 20 = 50 per chunk)
 
 var current_health: float = 0.0
@@ -42,6 +43,10 @@ func _create_hp_bar() -> void:
 	hp_bar_container = Node3D.new()
 	hp_bar_container.name = "HPBarContainer"
 	hp_bar_container.position.y = hp_bar_height
+	# Move HP bar out of the castle mesh toward the center of the battlefield
+	# Player base (team 0) at +Z moves toward -Z, Enemy base (team 1) at -Z moves toward +Z
+	var z_direction = -1.0 if team == 0 else 1.0
+	hp_bar_container.position.z = hp_bar_z_offset * z_direction
 	add_child(hp_bar_container)
 
 	# Calculate total bar width with gaps

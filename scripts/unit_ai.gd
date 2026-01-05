@@ -50,6 +50,19 @@ const OBSTACLE_SIGHT_RANGE: float = 8.0  # How far ahead to look for obstacles
 const OBSTACLE_SIDE_ANGLE: float = 0.5  # Radians (~30 degrees) for side rays
 var proactive_avoidance: int = 0  # -1 = steer left, 0 = none, 1 = steer right
 
+# Flocking behavior - ally awareness
+const ALLY_AWARENESS_RANGE: float = 6.0  # Range to detect nearby allies
+const SEPARATION_RANGE: float = 3.0  # Preferred minimum distance from allies
+const SEPARATION_STRENGTH: float = 0.6  # How strongly to separate (0-1)
+const PREDICTIVE_LOOK_AHEAD: float = 1.0  # Seconds to predict ally positions
+const ATTACK_SPREAD_RANGE: float = 4.0  # Distance to spread around target when attacking
+const ATTACK_SPREAD_STRENGTH: float = 0.4  # How strongly to spread around target
+
+# Cached ally data for flocking
+var nearby_allies: Array[Node3D] = []
+var last_velocity: Vector3 = Vector3.ZERO
+var current_velocity: Vector3 = Vector3.ZERO
+
 # Lane positions
 const LEFT_LANE_X: float = -15.0
 const RIGHT_LANE_X: float = 15.0
@@ -97,6 +110,14 @@ func get_lane_center_x() -> float:
 func _physics_process(delta: float) -> void:
 	if current_state == AIState.IDLE:
 		return
+
+	# Update ally awareness for flocking behaviors
+	_update_nearby_allies()
+
+	# Track velocity for predictive avoidance
+	if parent_unit and parent_unit is CharacterBody3D:
+		var body = parent_unit as CharacterBody3D
+		current_velocity = Vector3(body.velocity.x, 0, body.velocity.z)
 
 	match current_state:
 		AIState.ADVANCING:
@@ -151,11 +172,17 @@ func _process_attacking(delta: float) -> void:
 
 	# Check if still in range
 	if not _is_in_attack_range(current_target):
-		# Move closer
-		var direction = (current_target.global_position - global_position).normalized()
-		direction.y = 0
+		# Move closer - use full movement calculation for flocking
+		var direction = _calculate_movement_direction(current_target.global_position)
 		_move(direction, delta)
-	# else: Stay in place and attack (attack logic handled by PlacedUnit)
+	else:
+		# In range - still apply slight separation/spread while attacking
+		var separation = _calculate_separation_force()
+		var spread = _calculate_attack_spread()
+		var nudge = (separation + spread).limit_length(0.3)
+		if nudge.length() > 0.1:
+			# Gentle repositioning while attacking
+			_move(nudge.normalized(), delta * 0.5)
 
 func _process_responding(delta: float) -> void:
 	if not is_instance_valid(current_target):
@@ -172,9 +199,8 @@ func _process_responding(delta: float) -> void:
 		target_lost.emit()
 		return
 
-	# Move toward threat
-	var direction = (current_target.global_position - global_position).normalized()
-	direction.y = 0
+	# Move toward threat - use full movement calculation for flocking
+	var direction = _calculate_movement_direction(current_target.global_position)
 	_move(direction, delta)
 
 	# If in range, start attacking
@@ -258,6 +284,137 @@ func _get_objective_position() -> Vector3:
 
 	return Vector3(get_lane_center_x(), 0, target_z)
 
+## Flocking behavior - find nearby allies for separation/avoidance
+func _update_nearby_allies() -> void:
+	nearby_allies.clear()
+	var units_node = get_tree().get_first_node_in_group("placed_units")
+	if not units_node:
+		return
+
+	for unit in units_node.get_children():
+		if not is_instance_valid(unit) or unit == parent_unit:
+			continue
+		# Only consider allies (same team)
+		if unit.has_method("get_team") and unit.get_team() == team:
+			var dist = global_position.distance_to(unit.global_position)
+			if dist < ALLY_AWARENESS_RANGE:
+				nearby_allies.append(unit)
+
+## Calculate separation force - push away from nearby allies
+func _calculate_separation_force() -> Vector3:
+	if nearby_allies.is_empty():
+		return Vector3.ZERO
+
+	var separation = Vector3.ZERO
+	var close_allies = 0
+
+	for ally in nearby_allies:
+		if not is_instance_valid(ally):
+			continue
+
+		var to_ally = ally.global_position - global_position
+		to_ally.y = 0
+		var dist = to_ally.length()
+
+		if dist < SEPARATION_RANGE and dist > 0.1:
+			# Push away from ally, stronger when closer
+			var push_strength = 1.0 - (dist / SEPARATION_RANGE)
+			push_strength = push_strength * push_strength  # Quadratic falloff
+			separation -= to_ally.normalized() * push_strength
+			close_allies += 1
+
+	if close_allies > 0:
+		separation = separation / close_allies
+		separation = separation.normalized() * SEPARATION_STRENGTH
+
+	return separation
+
+## Predict if we'll collide with an ally and calculate avoidance
+func _calculate_predictive_avoidance() -> Vector3:
+	if nearby_allies.is_empty() or current_velocity.length() < 0.1:
+		return Vector3.ZERO
+
+	var avoidance = Vector3.ZERO
+	var my_future_pos = global_position + current_velocity * PREDICTIVE_LOOK_AHEAD
+
+	for ally in nearby_allies:
+		if not is_instance_valid(ally):
+			continue
+
+		# Get ally's velocity if available
+		var ally_velocity = Vector3.ZERO
+		if ally.has_method("get_horizontal_velocity"):
+			ally_velocity = ally.get_horizontal_velocity()
+		elif ally is CharacterBody3D:
+			ally_velocity = (ally as CharacterBody3D).velocity
+			ally_velocity.y = 0
+
+		var ally_future_pos = ally.global_position + ally_velocity * PREDICTIVE_LOOK_AHEAD
+
+		# Check if our future positions are too close
+		var future_dist = my_future_pos.distance_to(ally_future_pos)
+		if future_dist < SEPARATION_RANGE:
+			# Calculate avoidance direction - perpendicular to our movement
+			var to_ally_future = ally_future_pos - my_future_pos
+			to_ally_future.y = 0
+
+			if to_ally_future.length() > 0.1:
+				# Steer perpendicular to avoid collision
+				var avoid_dir = Vector3(-current_velocity.z, 0, current_velocity.x).normalized()
+				# Choose left or right based on which side ally is
+				var cross = current_velocity.cross(to_ally_future)
+				if cross.y > 0:
+					avoid_dir = -avoid_dir  # Ally is on left, steer right
+
+				var urgency = 1.0 - (future_dist / SEPARATION_RANGE)
+				avoidance += avoid_dir * urgency * 0.5
+
+	return avoidance.limit_length(0.6)
+
+## When attacking, spread around the target for better surface coverage
+func _calculate_attack_spread() -> Vector3:
+	if current_state != AIState.ATTACKING or not is_instance_valid(current_target):
+		return Vector3.ZERO
+
+	var spread = Vector3.ZERO
+	var allies_attacking_same = 0
+
+	# Find allies attacking the same target
+	for ally in nearby_allies:
+		if not is_instance_valid(ally):
+			continue
+
+		# Check if ally has an AI and is attacking same target
+		var ally_ai = ally.get_node_or_null("UnitAI") as UnitAI
+		if ally_ai and ally_ai.current_target == current_target:
+			allies_attacking_same += 1
+
+			# Calculate spread direction - move away from ally, around target
+			var my_to_target = current_target.global_position - global_position
+			var ally_to_target = current_target.global_position - ally.global_position
+			my_to_target.y = 0
+			ally_to_target.y = 0
+
+			if my_to_target.length() > 0.1 and ally_to_target.length() > 0.1:
+				# Calculate angle between us and ally relative to target
+				var my_angle = atan2(my_to_target.x, my_to_target.z)
+				var ally_angle = atan2(ally_to_target.x, ally_to_target.z)
+				var angle_diff = wrapf(my_angle - ally_angle, -PI, PI)
+
+				# If we're too close angularly, spread apart
+				if abs(angle_diff) < PI / 4:  # Within 45 degrees
+					# Move perpendicular to target direction, away from ally
+					var perpendicular = Vector3(-my_to_target.z, 0, my_to_target.x).normalized()
+					if angle_diff < 0:
+						perpendicular = -perpendicular  # Spread the other way
+					spread += perpendicular * 0.3
+
+	if allies_attacking_same > 0:
+		spread = spread / allies_attacking_same
+		return spread.limit_length(ATTACK_SPREAD_STRENGTH)
+
+	return Vector3.ZERO
+
 func _calculate_movement_direction(objective: Vector3) -> Vector3:
 	# Primary direction: toward objective
 	var to_objective = objective - global_position
@@ -288,6 +445,23 @@ func _calculate_movement_direction(objective: Vector3) -> Vector3:
 		var avoid_dir = Vector3(-direction.z, 0, direction.x) * avoidance_direction
 		# Blend avoidance with forward movement (more lateral, less forward)
 		direction = (direction * 0.3 + avoid_dir * 0.7).normalized()
+
+	# --- Flocking behaviors (ally awareness) ---
+
+	# Separation: push away from nearby allies to maintain spacing
+	var separation = _calculate_separation_force()
+	if separation.length() > 0.1:
+		direction = (direction + separation).normalized()
+
+	# Predictive avoidance: steer to avoid future collisions with allies
+	var predictive = _calculate_predictive_avoidance()
+	if predictive.length() > 0.1:
+		direction = (direction + predictive).normalized()
+
+	# Attack spread: spread around target when multiple units attacking same target
+	var spread = _calculate_attack_spread()
+	if spread.length() > 0.1:
+		direction = (direction + spread).normalized()
 
 	return direction
 
@@ -398,14 +572,12 @@ func _update_obstacle_avoidance(actual_movement: float, expected_movement: float
 
 			avoidance_timer = AVOIDANCE_DURATION
 			stuck_timer = 0
-			print("Unit stuck, avoiding %s" % ("right" if avoidance_direction > 0 else "left"))
 
 		elif stuck_timer > STUCK_THRESHOLD and avoidance_timer <= 0:
 			# Still stuck after avoiding, try the other direction
 			avoidance_direction = -avoidance_direction
 			avoidance_timer = AVOIDANCE_DURATION
 			stuck_timer = 0
-			print("Still stuck, trying %s" % ("right" if avoidance_direction > 0 else "left"))
 	else:
 		# Moving fine, reset stuck timer
 		stuck_timer = 0
@@ -450,3 +622,6 @@ func get_current_target() -> Node3D:
 
 func is_attacking() -> bool:
 	return current_state == AIState.ATTACKING
+
+func get_horizontal_velocity() -> Vector3:
+	return current_velocity

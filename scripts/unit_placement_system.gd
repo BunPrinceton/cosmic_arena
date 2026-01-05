@@ -122,22 +122,88 @@ func _try_place_unit() -> void:
 		return
 
 	var snapped_pos = placement_grid.get_snapped_position(current_mouse_world_pos)
+	var final_pos: Vector3
 
 	# Check if position is in valid zone (player's half)
 	if is_current_position_valid:
 		# Find best placement position (offset if overlapping with other units)
-		var final_pos = _find_best_placement_position(snapped_pos, current_unit_data.grid_size)
-
-		# Spend energy and place
-		if energy_system and energy_system.spend_energy(current_unit_data.energy_cost):
-			unit_placed.emit(current_unit_data, final_pos)
-		else:
-			placement_cancelled.emit()
+		final_pos = _find_best_placement_position(snapped_pos, current_unit_data.grid_size)
 	else:
-		# Completely invalid (enemy zone, out of bounds) - cancel
+		# Position is invalid - try to find nearest valid position
+		var nearest_valid = _find_nearest_valid_position(current_mouse_world_pos, current_unit_data.grid_size)
+		if nearest_valid == Vector3.ZERO:
+			# No valid position found
+			placement_cancelled.emit()
+			_end_placement()
+			return
+		final_pos = _find_best_placement_position(nearest_valid, current_unit_data.grid_size)
+
+	# Spend energy and place
+	if energy_system and energy_system.spend_energy(current_unit_data.energy_cost):
+		unit_placed.emit(current_unit_data, final_pos)
+	else:
 		placement_cancelled.emit()
 
 	_end_placement()
+
+func _find_nearest_valid_position(attempted_pos: Vector3, grid_size: Vector2i) -> Vector3:
+	## Find the nearest valid placement position when attempting to place in an invalid area.
+	## This allows players to place units even when their camera can't see their valid territory -
+	## the unit will spawn at the closest valid position toward their side of the board.
+
+	var cell_size = placement_grid.CELL_SIZE
+
+	# First, clamp the position toward valid territory
+	# Player's valid zone is Z: playable_z_min (0) to playable_z_max (50)
+	# X is clamped to grid bounds
+	var clamped_z = clamp(attempted_pos.z, placement_grid.playable_z_min + cell_size, placement_grid.playable_z_max - cell_size)
+	var clamped_x = clamp(attempted_pos.x, placement_grid.grid_min.x + cell_size, placement_grid.grid_max.x - cell_size)
+	var clamped_pos = Vector3(clamped_x, 0, clamped_z)
+
+	# Check if the clamped position is valid
+	if placement_grid.is_position_valid(clamped_pos, grid_size):
+		return placement_grid.get_snapped_position(clamped_pos)
+
+	# If clamped position is blocked (by obstacle), search in expanding rings
+	# Start from the clamped position and search outward, preferring positions closer to player base
+	var best_pos = Vector3.ZERO
+	var best_dist = INF
+
+	# Search in expanding rings from the clamped position
+	for ring in range(1, 20):  # Check up to 20 cells out (40 world units)
+		var found_in_ring = false
+
+		for dx in range(-ring, ring + 1):
+			for dz in range(-ring, ring + 1):
+				# Only check cells on the ring edge
+				if abs(dx) != ring and abs(dz) != ring:
+					continue
+
+				var test_pos = clamped_pos + Vector3(dx * cell_size, 0, dz * cell_size)
+
+				# Skip positions outside valid Z range
+				if test_pos.z < placement_grid.playable_z_min or test_pos.z > placement_grid.playable_z_max:
+					continue
+
+				# Check if position is valid
+				if not placement_grid.is_position_valid(test_pos, grid_size):
+					continue
+
+				# Calculate distance from attempted position (favor closer positions)
+				var dist = attempted_pos.distance_to(test_pos)
+				if dist < best_dist:
+					best_dist = dist
+					best_pos = test_pos
+					found_in_ring = true
+
+		# If we found a valid position in this ring, use it
+		if found_in_ring:
+			break
+
+	if best_pos != Vector3.ZERO:
+		return placement_grid.get_snapped_position(best_pos)
+
+	return Vector3.ZERO  # No valid position found
 
 func _find_best_placement_position(desired_pos: Vector3, grid_size: Vector2i) -> Vector3:
 	# Check if desired position overlaps with existing units

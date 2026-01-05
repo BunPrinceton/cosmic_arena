@@ -378,3 +378,6 @@ func set_idle() -> void:
 func on_attacked_by(attacker: Node3D) -> void:
 	if unit_ai:
 		unit_ai.on_attacked_by(attacker)
+
+func get_horizontal_velocity() -> Vector3:
+	return Vector3(velocity.x, 0, velocity.z)
