@@ -4,20 +4,25 @@
 
 [resource]
 script = ExtResource("1")
-unit_name = "Large Rock"
-description = "A large boulder. Takes up significant space."
+unit_name = "Boulder Artillery"
+description = "Slow artillery unit. Launches trees that explode on impact. Can outrange towers."
 visual_color = Color(0.6, 0.55, 0.5, 1)
-max_health = 200.0
-move_speed = 15.0
-attack_damage = 20.0
-attack_range = 30.0
-attack_cooldown = 3.0
-vision_range = 50.0
+max_health = 120.0
+move_speed = 75.0
+attack_damage = 40.0
+attack_range = 200.0
+attack_cooldown = 4.0
+vision_range = 250.0
 energy_cost = 4.0
 visual_size = Vector2(60, 60)
-grid_size = Vector2i(3, 2)
+grid_size = Vector2i(2, 2)
 model_scene_path = "res://assets/models/environment/rocks/Rock_3.glb"
-is_ranged = false
+is_ranged = true
 is_support = false
 heal_amount = 0.0
 heal_range = 0.0
+spawn_count = 1
+swarm_spread = 0.0
+splash_radius = 4.0
+projectile_speed = 8.0
+projectile_model_path = "res://assets/models/environment/trees/PineTree_1.glb"

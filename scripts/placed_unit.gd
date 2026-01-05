@@ -27,9 +27,15 @@ var collision_shape: CollisionShape3D = null
 var soft_collision_area: Area3D = null
 var push_strength: float = 1.0  # Scales with unit size
 
+# HP Bar
+var hp_bar_container: Node3D = null
+var hp_chunks: Array[MeshInstance3D] = []
+var hp_bar_background: MeshInstance3D = null
+
 func _ready() -> void:
-	# Add to placed_units group for easy finding
-	add_to_group("placed_units")
+	# Units are children of the PlacedUnits container (which is in placed_units group)
+	# Don't add individual units to the group - it confuses get_first_node_in_group
+	pass
 
 func setup(data: UnitData, spawn_pos: Vector3, unit_team: int = 0) -> void:
 	unit_data = data
@@ -49,6 +55,9 @@ func setup(data: UnitData, spawn_pos: Vector3, unit_team: int = 0) -> void:
 	else:
 		# Fallback: create a simple colored box
 		_create_fallback_model()
+
+	# Create HP bar
+	_create_hp_bar()
 
 	# Setup AI
 	_setup_ai()
@@ -120,6 +129,94 @@ func _setup_ai() -> void:
 	unit_ai.target_acquired.connect(_on_target_acquired)
 	unit_ai.target_lost.connect(_on_target_lost)
 
+func _create_hp_bar() -> void:
+	var unit_size = max(unit_data.grid_size.x, unit_data.grid_size.y)
+
+	# Scale HP bar based on unit size
+	var bar_width = 1.0 + (unit_size - 1) * 0.5  # 1.0 for small, 1.5 for large, 2.0 for huge
+	var bar_height = unit_size * 1.5 + 1.0  # Height above unit
+	var chunk_height = 0.15
+	var chunk_gap = 0.02
+
+	# Determine chunk count based on HP (roughly 1 chunk per 25 HP for small, scales up)
+	var hp_per_chunk = 25.0 + (unit_size - 1) * 15.0  # 25 for small, 40 for medium, 55 for large
+	var chunk_count = int(ceil(unit_data.max_health / hp_per_chunk))
+	chunk_count = clamp(chunk_count, 2, 12)  # Min 2, max 12 chunks
+
+	# Container for HP bar
+	hp_bar_container = Node3D.new()
+	hp_bar_container.name = "HPBarContainer"
+	hp_bar_container.position.y = bar_height
+	add_child(hp_bar_container)
+
+	# Calculate chunk dimensions
+	var chunk_width = (bar_width - (chunk_count - 1) * chunk_gap) / chunk_count
+	var start_x = -bar_width / 2.0 + chunk_width / 2.0
+
+	# Create background
+	hp_bar_background = MeshInstance3D.new()
+	var bg_mesh = BoxMesh.new()
+	bg_mesh.size = Vector3(bar_width + 0.05, chunk_height + 0.05, 0.03)
+	hp_bar_background.mesh = bg_mesh
+	hp_bar_background.position.z = 0.02
+
+	var bg_material = StandardMaterial3D.new()
+	bg_material.albedo_color = Color(0.1, 0.1, 0.1, 0.8)
+	bg_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	bg_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	hp_bar_background.material_override = bg_material
+	hp_bar_container.add_child(hp_bar_background)
+
+	# Create chunks
+	hp_chunks.clear()
+	for i in range(chunk_count):
+		var chunk = MeshInstance3D.new()
+		var chunk_mesh = BoxMesh.new()
+		chunk_mesh.size = Vector3(chunk_width, chunk_height, 0.05)
+		chunk.mesh = chunk_mesh
+		chunk.position.x = start_x + i * (chunk_width + chunk_gap)
+
+		var chunk_material = StandardMaterial3D.new()
+		chunk_material.albedo_color = Color(0.2, 0.9, 0.2)  # Start green
+		chunk_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		chunk.material_override = chunk_material
+
+		hp_bar_container.add_child(chunk)
+		hp_chunks.append(chunk)
+
+	_update_hp_bar()
+
+func _update_hp_bar() -> void:
+	if hp_chunks.is_empty():
+		return
+
+	var health_percent = current_health / unit_data.max_health
+	var chunks_filled = int(ceil(health_percent * hp_chunks.size()))
+
+	for i in range(hp_chunks.size()):
+		var chunk = hp_chunks[i]
+		var chunk_material = chunk.material_override as StandardMaterial3D
+
+		if i < chunks_filled:
+			chunk.visible = true
+			chunk_material.albedo_color = _get_health_color(health_percent)
+		else:
+			chunk.visible = false
+
+func _get_health_color(percent: float) -> Color:
+	# Green (>75%) -> Yellow (50-75%) -> Orange (25-50%) -> Red (<25%)
+	if percent > 0.75:
+		var t = (percent - 0.75) / 0.25
+		return Color(1.0 - t * 0.8, 0.9, 0.2)
+	elif percent > 0.5:
+		var t = (percent - 0.5) / 0.25
+		return Color(1.0, 0.5 + t * 0.4, 0.1)
+	elif percent > 0.25:
+		var t = (percent - 0.25) / 0.25
+		return Color(1.0, 0.2 + t * 0.3, 0.1)
+	else:
+		return Color(0.9, 0.15, 0.1)
+
 func set_bases(player_base: Node3D, enemy_base: Node3D) -> void:
 	if unit_ai:
 		unit_ai.set_bases(player_base, enemy_base)
@@ -136,6 +233,10 @@ func _process(delta: float) -> void:
 	# Attack if we have a target and cooldown is ready
 	if is_attacking and attack_cooldown_timer <= 0:
 		_perform_attack()
+
+	# HP bar faces perpendicular to lanes (fixed rotation facing positive Z)
+	if hp_bar_container:
+		hp_bar_container.rotation.y = 0
 
 func _physics_process(delta: float) -> void:
 	# Apply soft "jello" collision to nearby bodies
@@ -206,17 +307,52 @@ func _perform_attack() -> void:
 		is_attacking = false
 		return
 
-	# Deal damage
-	if target.has_method("take_damage"):
-		target.take_damage(unit_data.attack_damage)
-		unit_attacking.emit(self, target)
-		print("%s attacks %s for %.1f damage" % [unit_data.unit_name, target.name, unit_data.attack_damage])
+	unit_attacking.emit(self, target)
+
+	# Check if this is a ranged unit with projectile
+	if unit_data.is_ranged and unit_data.projectile_speed > 0:
+		_fire_projectile(target)
+	else:
+		# Melee attack - deal damage directly
+		if target.has_method("take_damage"):
+			target.take_damage(unit_data.attack_damage)
+			print("%s attacks %s for %.1f damage" % [unit_data.unit_name, target.name, unit_data.attack_damage])
 
 	# Reset cooldown
 	attack_cooldown_timer = unit_data.attack_cooldown
 
+func _fire_projectile(target: Node3D) -> void:
+	# Create projectile
+	var projectile = Projectile.new()
+	projectile.name = "UnitProjectile"
+
+	# Add to scene FIRST (not as child of this unit)
+	var parent = get_tree().current_scene
+	if parent:
+		parent.add_child(projectile)
+	else:
+		add_child(projectile)
+
+	# Position projectile at unit's position (slightly elevated) - AFTER adding to scene
+	projectile.global_position = global_position + Vector3(0, 1.5, 0)
+	projectile.source_unit = self
+
+	# Setup projectile with target position and parameters
+	var target_pos = target.global_position + Vector3(0, 1.0, 0)
+	projectile.setup(
+		target_pos,
+		unit_data.projectile_speed,
+		unit_data.attack_damage,
+		unit_data.splash_radius,
+		team,
+		unit_data.projectile_model_path,
+		0.3  # Model scale
+	)
+
 func take_damage(amount: float) -> void:
 	current_health -= amount
+	current_health = max(0, current_health)
+	_update_hp_bar()
 	print("%s took %.1f damage, health: %.1f/%.1f" % [unit_data.unit_name, amount, current_health, unit_data.max_health])
 
 	if current_health <= 0:

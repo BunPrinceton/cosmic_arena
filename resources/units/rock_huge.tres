@@ -4,20 +4,25 @@
 
 [resource]
 script = ExtResource("1")
-unit_name = "Huge Rock"
-description = "A massive boulder. Expensive but dominates the field."
+unit_name = "Rock Golem"
+description = "Massive tank unit. High HP, strong attacks, extended melee reach."
 visual_color = Color(0.65, 0.6, 0.55, 1)
-max_health = 400.0
-move_speed = 10.0
-attack_damage = 40.0
-attack_range = 30.0
-attack_cooldown = 4.0
-vision_range = 50.0
-energy_cost = 6.5
+max_health = 500.0
+move_speed = 150.0
+attack_damage = 45.0
+attack_range = 45.0
+attack_cooldown = 2.0
+vision_range = 120.0
+energy_cost = 6.0
 visual_size = Vector2(80, 80)
-grid_size = Vector2i(3, 3)
+grid_size = Vector2i(2, 2)
 model_scene_path = "res://assets/models/environment/rocks/Rock_4.glb"
 is_ranged = false
 is_support = false
 heal_amount = 0.0
 heal_range = 0.0
+spawn_count = 1
+swarm_spread = 0.0
+splash_radius = 0.0
+projectile_speed = 0.0
+projectile_model_path = ""

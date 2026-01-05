@@ -141,6 +141,14 @@ func _process_attacking(delta: float) -> void:
 		target_lost.emit()
 		return
 
+	# Check if target is still alive (towers/bases have is_alive method)
+	if current_target.has_method("is_alive") and not current_target.is_alive():
+		# Target died, find new one
+		current_target = null
+		current_state = AIState.ADVANCING
+		target_lost.emit()
+		return
+
 	# Check if still in range
 	if not _is_in_attack_range(current_target):
 		# Move closer
@@ -152,6 +160,13 @@ func _process_attacking(delta: float) -> void:
 func _process_responding(delta: float) -> void:
 	if not is_instance_valid(current_target):
 		# Threat eliminated, resume advancing
+		current_target = null
+		current_state = AIState.ADVANCING
+		target_lost.emit()
+		return
+
+	# Check if target is still alive
+	if current_target.has_method("is_alive") and not current_target.is_alive():
 		current_target = null
 		current_state = AIState.ADVANCING
 		target_lost.emit()
@@ -174,16 +189,19 @@ func _find_priority_target() -> Node3D:
 	if enemy_unit and global_position.distance_to(enemy_unit.global_position) <= vision_range:
 		return enemy_unit
 
-	# Check for towers in our lane
+	# Check for towers in our lane (only if alive)
 	var lane_tower = _find_lane_tower()
 	if lane_tower:
 		return lane_tower
 
-	# Default to enemy base
-	if team == 0:
-		return enemy_base
-	else:
-		return player_base
+	# Default to enemy base (if alive)
+	var target_base: Node3D = enemy_base if team == 0 else player_base
+	if target_base and is_instance_valid(target_base):
+		if target_base.has_method("is_alive") and not target_base.is_alive():
+			return null  # Base destroyed, no target
+		return target_base
+
+	return null
 
 func _find_nearest_enemy_unit() -> Node3D:
 	var units_node = get_tree().get_first_node_in_group("placed_units")
@@ -210,6 +228,9 @@ func _find_lane_tower() -> Node3D:
 	# Find tower in our lane that's still alive
 	for tower in towers:
 		if not is_instance_valid(tower):
+			continue
+		# Check if tower is actually alive (not just valid node)
+		if tower.has_method("is_alive") and not tower.is_alive():
 			continue
 		# Check if tower is in our lane
 		var tower_lane = Lane.LEFT if tower.global_position.x < 0 else Lane.RIGHT
@@ -395,8 +416,23 @@ func _update_obstacle_avoidance(actual_movement: float, expected_movement: float
 func _is_in_attack_range(target: Node3D) -> bool:
 	if not is_instance_valid(target):
 		return false
+
+	# Check if target is alive
+	if target.has_method("is_alive") and not target.is_alive():
+		return false
+
 	var dist = global_position.distance_to(target.global_position)
-	return dist <= attack_range
+
+	# Account for target size - larger structures have larger hitboxes
+	var target_size_bonus: float = 0.0
+	if target.has_method("get_team"):
+		# Tower or base - add size bonus for melee to reach
+		if target is StaticBody3D:
+			target_size_bonus = 4.0  # Base is large
+		elif "tower" in target.name.to_lower():
+			target_size_bonus = 3.0  # Tower is medium-large
+
+	return dist <= attack_range + target_size_bonus
 
 func on_attacked_by(attacker: Node3D) -> void:
 	# Respond to being attacked

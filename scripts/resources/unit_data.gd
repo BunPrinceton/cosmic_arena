@@ -31,6 +31,15 @@ class_name UnitData
 @export var heal_amount: float = 0.0
 @export var heal_range: float = 0.0
 
+@export_group("Swarm")
+@export var spawn_count: int = 1  # How many units to spawn (1 = normal, 3 = swarm)
+@export var swarm_spread: float = 2.0  # How far apart swarm units spawn
+
+@export_group("Artillery/Ranged")
+@export var splash_radius: float = 0.0  # 0 = no splash, >0 = AoE damage radius
+@export var projectile_speed: float = 0.0  # 0 = instant hit, >0 = travel time
+@export var projectile_model_path: String = ""  # Model for projectile (if ranged)
+
 ## Returns a formatted string with unit stats for UI tooltips
 func get_stats_text() -> String:
 	var stats = "%s (Cost: %.1f)\n" % [unit_name, energy_cost]

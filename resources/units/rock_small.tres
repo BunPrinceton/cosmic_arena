@@ -4,20 +4,25 @@
 
 [resource]
 script = ExtResource("1")
-unit_name = "Small Rock"
-description = "A small boulder. Cheap and quick to deploy."
+unit_name = "Pebble Swarm"
+description = "Three fast pebbles that swarm enemies. Weak but high DPS."
 visual_color = Color(0.5, 0.45, 0.4, 1)
 max_health = 50.0
-move_speed = 25.0
+move_speed = 200.0
 attack_damage = 5.0
-attack_range = 30.0
-attack_cooldown = 2.0
-vision_range = 50.0
-energy_cost = 1.0
-visual_size = Vector2(20, 20)
+attack_range = 20.0
+attack_cooldown = 1.25
+vision_range = 80.0
+energy_cost = 2.0
+visual_size = Vector2(15, 15)
 grid_size = Vector2i(1, 1)
 model_scene_path = "res://assets/models/environment/rocks/Rock_1.glb"
 is_ranged = false
 is_support = false
 heal_amount = 0.0
 heal_range = 0.0
+spawn_count = 3
+swarm_spread = 2.5
+splash_radius = 0.0
+projectile_speed = 0.0
+projectile_model_path = ""

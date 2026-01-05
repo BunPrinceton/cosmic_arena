@@ -24,6 +24,10 @@ var card_hand: CardHand
 # UI Layer
 var ui_layer: CanvasLayer
 
+# Victory/Defeat screen
+var game_over_screen: Control = null
+var is_game_over: bool = false
+
 # Placed units container
 var placed_units: Node3D
 
@@ -48,9 +52,21 @@ func _find_bases_and_towers() -> void:
 		enemy_base = bases_node.get_node_or_null("EnemyBase")
 		print("Found bases - Player: %s, Enemy: %s" % [player_base != null, enemy_base != null])
 
+		# Connect to base destroyed signals
+		if enemy_base and enemy_base.has_signal("base_destroyed"):
+			enemy_base.base_destroyed.connect(_on_enemy_base_destroyed)
+		if player_base and player_base.has_signal("base_destroyed"):
+			player_base.base_destroyed.connect(_on_player_base_destroyed)
+
 	# Find towers (look for nodes with "tower" in name, case insensitive)
 	towers.clear()
-	_find_towers_recursive(self)
+	var towers_to_init: Array[Node3D] = []
+	_find_towers_recursive(self, towers_to_init)
+
+	# Initialize tower scripts after recursion complete (avoids stack overflow)
+	for tower in towers_to_init:
+		tower._ready()
+
 	print("Found %d towers" % towers.size())
 
 	# Find obstacles to block placement
@@ -91,10 +107,10 @@ func _find_obstacles_recursive(node: Node) -> void:
 	for child in node.get_children():
 		_find_obstacles_recursive(child)
 
-func _find_towers_recursive(node: Node) -> void:
-	# Check if this node is a tower
-	if "tower" in node.name.to_lower():
-		if node is Node3D:
+func _find_towers_recursive(node: Node, towers_to_init: Array[Node3D]) -> void:
+	# Check if this node is a tower (but skip dynamically created nodes)
+	if "tower" in node.name.to_lower() and not "Container" in node.name and not "Collision" in node.name:
+		if node is Node3D and node not in towers:
 			var tower_node = node as Node3D
 			towers.append(tower_node)
 
@@ -107,13 +123,15 @@ func _find_towers_recursive(node: Node) -> void:
 				tower_node.set_script(tower_script)
 				tower_node.max_health = 500.0
 				tower_node.team = tower_team
-				tower_node._ready()  # Initialize the script
+				towers_to_init.append(tower_node)  # Mark for initialization later
 
 			print("Found tower: %s at %s (team: %d)" % [node.name, tower_node.global_position, tower_team])
+			return  # Don't recurse into tower's children
 
-	# Check children
-	for child in node.get_children():
-		_find_towers_recursive(child)
+	# Check children (get list first to avoid modification during iteration)
+	var children = node.get_children()
+	for child in children:
+		_find_towers_recursive(child, towers_to_init)
 
 func _setup_placed_units_container() -> void:
 	placed_units = Node3D.new()
@@ -250,22 +268,32 @@ func _create_energy_display() -> void:
 		)
 
 func _on_unit_placed(unit_data: UnitData, position: Vector3) -> void:
-	# Create and spawn the placed unit
-	var placed_unit = PlacedUnit.new()
-	placed_units.add_child(placed_unit)
-	placed_unit.setup(unit_data, position, 0)  # Team 0 = player
+	# Handle swarm units (spawn multiple)
+	var spawn_count = unit_data.spawn_count if unit_data.spawn_count > 0 else 1
+	var spread = unit_data.swarm_spread if unit_data.swarm_spread > 0 else 0.0
 
-	# Give the unit knowledge of bases and towers
-	placed_unit.set_bases(player_base, enemy_base)
-	placed_unit.set_towers(towers)
+	for i in range(spawn_count):
+		# Calculate spawn offset for swarm
+		var spawn_offset = Vector3.ZERO
+		if spawn_count > 1:
+			var angle = (float(i) / spawn_count) * TAU
+			spawn_offset = Vector3(cos(angle), 0, sin(angle)) * spread
 
-	# Note: We don't block grid cells for moving units anymore
-	# Units move, so blocking their spawn position doesn't make sense
+		var spawn_pos = position + spawn_offset
 
-	# Connect to unit destroyed
-	placed_unit.unit_destroyed.connect(_on_unit_destroyed)
+		# Create and spawn the placed unit
+		var placed_unit = PlacedUnit.new()
+		placed_units.add_child(placed_unit)
+		placed_unit.setup(unit_data, spawn_pos, 0)  # Team 0 = player
 
-	print("Placed %s at %s" % [unit_data.unit_name, position])
+		# Give the unit knowledge of bases and towers
+		placed_unit.set_bases(player_base, enemy_base)
+		placed_unit.set_towers(towers)
+
+		# Connect to unit destroyed
+		placed_unit.unit_destroyed.connect(_on_unit_destroyed)
+
+	print("Placed %s x%d at %s" % [unit_data.unit_name, spawn_count, position])
 
 func _on_placement_cancelled() -> void:
 	print("Placement cancelled")
@@ -273,3 +301,101 @@ func _on_placement_cancelled() -> void:
 func _on_unit_destroyed(_unit: PlacedUnit) -> void:
 	# Unit destroyed - no grid cleanup needed since we don't block moving units
 	pass
+
+func _on_enemy_base_destroyed(_base: Node3D) -> void:
+	if is_game_over:
+		return
+	is_game_over = true
+	_show_game_over_screen(true)  # Victory
+
+func _on_player_base_destroyed(_base: Node3D) -> void:
+	if is_game_over:
+		return
+	is_game_over = true
+	_show_game_over_screen(false)  # Defeat
+
+func _show_game_over_screen(victory: bool) -> void:
+	# Pause unit spawning/placement
+	if card_hand:
+		card_hand.visible = false
+
+	# Create game over screen
+	game_over_screen = Control.new()
+	game_over_screen.name = "GameOverScreen"
+	game_over_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+	ui_layer.add_child(game_over_screen)
+
+	# Dark overlay
+	var overlay = ColorRect.new()
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.color = Color(0, 0, 0, 0.7)
+	game_over_screen.add_child(overlay)
+
+	# Center container
+	var center = CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	game_over_screen.add_child(center)
+
+	# Panel
+	var panel = PanelContainer.new()
+	panel.custom_minimum_size = Vector2(400, 300)
+	center.add_child(panel)
+
+	# Style the panel
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.1, 0.1, 0.15, 0.95)
+	panel_style.border_color = Color(0.8, 0.7, 0.3) if victory else Color(0.8, 0.2, 0.2)
+	panel_style.set_border_width_all(3)
+	panel_style.set_corner_radius_all(10)
+	panel.add_theme_stylebox_override("panel", panel_style)
+
+	# VBox for content
+	var vbox = VBoxContainer.new()
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 30)
+	panel.add_child(vbox)
+
+	# Spacer top
+	var spacer_top = Control.new()
+	spacer_top.custom_minimum_size.y = 20
+	vbox.add_child(spacer_top)
+
+	# Victory/Defeat text
+	var title = Label.new()
+	title.text = "VICTORY!" if victory else "DEFEAT"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 48)
+	title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3) if victory else Color(0.9, 0.3, 0.3))
+	vbox.add_child(title)
+
+	# Subtitle
+	var subtitle = Label.new()
+	subtitle.text = "Enemy base destroyed!" if victory else "Your base was destroyed!"
+	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	subtitle.add_theme_font_size_override("font_size", 18)
+	subtitle.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	vbox.add_child(subtitle)
+
+	# Spacer
+	var spacer = Control.new()
+	spacer.custom_minimum_size.y = 20
+	vbox.add_child(spacer)
+
+	# Main Menu button
+	var menu_button = Button.new()
+	menu_button.text = "Return to Main Menu"
+	menu_button.custom_minimum_size = Vector2(200, 50)
+	menu_button.add_theme_font_size_override("font_size", 18)
+	menu_button.pressed.connect(_on_main_menu_pressed)
+	vbox.add_child(menu_button)
+
+	# Center the button
+	menu_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+	# Spacer bottom
+	var spacer_bottom = Control.new()
+	spacer_bottom.custom_minimum_size.y = 20
+	vbox.add_child(spacer_bottom)
+
+func _on_main_menu_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
