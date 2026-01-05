@@ -13,6 +13,14 @@ var anim_player: AnimationPlayer = null
 var current_anim: String = ""
 
 func _ready() -> void:
+	# Set collision layers (bit flags: layer N = 2^(N-1)):
+	# Layer 1 (value 1) = Ground/Obstacles/Static environment
+	# Layer 2 (value 2) = Player/Commander
+	# Layer 3 (value 4) = Units
+	# Player collides with ground/obstacles (layer 1) but NOT units (layer 3)
+	collision_layer = 2  # Player is on layer 2
+	collision_mask = 1   # Only collide with ground/obstacles (layer 1)
+
 	# Check if NavigationAgent3D exists
 	nav_agent = get_node_or_null("NavigationAgent3D")
 	if nav_agent:

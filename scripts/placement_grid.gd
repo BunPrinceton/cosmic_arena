@@ -37,7 +37,8 @@ var unit_footprint_mesh: MeshInstance3D
 var is_visible: bool = false
 var current_unit_grid_size: Vector2i = Vector2i(1, 1)
 var current_unit_position: Vector3 = Vector3.ZERO
-var blocked_positions: Array[Vector2i] = []  # Blocked grid cells
+var blocked_positions: Array[Vector2i] = []  # Dynamic blocked cells (units)
+var static_blocked_positions: Array[Vector2i] = []  # Static blocked cells (obstacles)
 
 func _ready() -> void:
 	_create_materials()
@@ -88,6 +89,11 @@ func show_grid(unit_grid_size: Vector2i = Vector2i(1, 1)) -> void:
 	current_unit_grid_size = unit_grid_size
 	is_visible = true
 	visible = true
+
+	# Clear dynamic blocked positions (units move, so don't keep old positions)
+	# Static blocked positions (obstacles) are kept
+	blocked_positions.clear()
+
 	_rebuild_grid_mesh()
 	_rebuild_blocked_mesh()
 
@@ -136,10 +142,16 @@ func _rebuild_blocked_mesh() -> void:
 	# Enemy half of field is blocked
 	_add_quad(st, grid_min.x, grid_max.x, grid_min.z, 0.0, y)
 
-	# Add blocked cells from obstacles/other units
+	# Add static blocked cells (obstacles)
+	for cell in static_blocked_positions:
+		var x = grid_min.x + cell.x * CELL_SIZE
+		var z = grid_min.z + cell.y * CELL_SIZE
+		_add_quad(st, x, x + CELL_SIZE, z, z + CELL_SIZE, y)
+
+	# Add dynamic blocked cells (units)
 	for cell in blocked_positions:
-		var x = cell.x * CELL_SIZE
-		var z = cell.y * CELL_SIZE
+		var x = grid_min.x + cell.x * CELL_SIZE
+		var z = grid_min.z + cell.y * CELL_SIZE
 		_add_quad(st, x, x + CELL_SIZE, z, z + CELL_SIZE, y)
 
 	blocked_cells_mesh.mesh = st.commit()
@@ -206,8 +218,13 @@ func is_position_valid(world_pos: Vector3, grid_size: Vector2i) -> bool:
 			if world_z < playable_z_min or world_z >= playable_z_max:
 				return false
 
-			# Check blocked cells
-			if Vector2i(check_x, check_z) in blocked_positions:
+			# Check static blocked cells (obstacles)
+			var cell_to_check = Vector2i(check_x, check_z)
+			if cell_to_check in static_blocked_positions:
+				return false
+
+			# Check dynamic blocked cells (units)
+			if cell_to_check in blocked_positions:
 				return false
 
 	return true
@@ -233,5 +250,24 @@ func remove_blocked_cell(grid_pos: Vector2i) -> void:
 ## Clear all blocked cells
 func clear_blocked_cells() -> void:
 	blocked_positions.clear()
+	if is_visible:
+		_rebuild_blocked_mesh()
+
+## Add a static blocked cell (e.g., for obstacles that never move)
+func add_static_blocked_cell(grid_pos: Vector2i) -> void:
+	if grid_pos not in static_blocked_positions:
+		static_blocked_positions.append(grid_pos)
+		if is_visible:
+			_rebuild_blocked_mesh()
+
+## Remove a static blocked cell
+func remove_static_blocked_cell(grid_pos: Vector2i) -> void:
+	static_blocked_positions.erase(grid_pos)
+	if is_visible:
+		_rebuild_blocked_mesh()
+
+## Clear all static blocked cells
+func clear_static_blocked_cells() -> void:
+	static_blocked_positions.clear()
 	if is_visible:
 		_rebuild_blocked_mesh()

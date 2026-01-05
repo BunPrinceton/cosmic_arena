@@ -121,18 +121,84 @@ func _try_place_unit() -> void:
 		_cancel_placement()
 		return
 
+	var snapped_pos = placement_grid.get_snapped_position(current_mouse_world_pos)
+
+	# Check if position is in valid zone (player's half)
 	if is_current_position_valid:
-		# Spend energy
+		# Find best placement position (offset if overlapping with other units)
+		var final_pos = _find_best_placement_position(snapped_pos, current_unit_data.grid_size)
+
+		# Spend energy and place
 		if energy_system and energy_system.spend_energy(current_unit_data.energy_cost):
-			var snapped_pos = placement_grid.get_snapped_position(current_mouse_world_pos)
-			unit_placed.emit(current_unit_data, snapped_pos)
+			unit_placed.emit(current_unit_data, final_pos)
 		else:
 			placement_cancelled.emit()
 	else:
-		# Invalid placement - cancel
+		# Completely invalid (enemy zone, out of bounds) - cancel
 		placement_cancelled.emit()
 
 	_end_placement()
+
+func _find_best_placement_position(desired_pos: Vector3, grid_size: Vector2i) -> Vector3:
+	# Check if desired position overlaps with existing units
+	var unit_radius = max(grid_size.x, grid_size.y) * placement_grid.CELL_SIZE
+	var placed_units_node = get_tree().get_first_node_in_group("placed_units")
+
+	if not placed_units_node:
+		return desired_pos
+
+	# Check for nearby units
+	var too_close = false
+	for unit in placed_units_node.get_children():
+		if not is_instance_valid(unit):
+			continue
+		var dist = desired_pos.distance_to(unit.global_position)
+		if dist < unit_radius * 0.8:  # Allow some overlap for swarming
+			too_close = true
+			break
+
+	if not too_close:
+		return desired_pos
+
+	# Find nearest free position by spiraling outward
+	var best_pos = desired_pos
+	var best_dist = INF
+	var cell_size = placement_grid.CELL_SIZE
+
+	# Check positions in expanding rings
+	for ring in range(1, 6):  # Check up to 5 cells out
+		for dx in range(-ring, ring + 1):
+			for dz in range(-ring, ring + 1):
+				# Only check cells on the ring edge
+				if abs(dx) != ring and abs(dz) != ring:
+					continue
+
+				var test_pos = desired_pos + Vector3(dx * cell_size, 0, dz * cell_size)
+
+				# Check if position is valid (bounds, obstacles, etc.)
+				if not placement_grid.is_position_valid(test_pos, grid_size):
+					continue
+
+				# Check if far enough from other units
+				var is_free = true
+				for unit in placed_units_node.get_children():
+					if not is_instance_valid(unit):
+						continue
+					if test_pos.distance_to(unit.global_position) < unit_radius * 0.6:
+						is_free = false
+						break
+
+				if is_free:
+					var dist_from_desired = test_pos.distance_to(desired_pos)
+					if dist_from_desired < best_dist:
+						best_dist = dist_from_desired
+						best_pos = test_pos
+
+		# If we found a position on this ring, use it
+		if best_dist < INF:
+			break
+
+	return best_pos
 
 func _cancel_placement() -> void:
 	placement_cancelled.emit()
@@ -165,6 +231,16 @@ func remove_blocked_area(world_pos: Vector3, grid_size: Vector2i) -> void:
 	for dx in range(grid_size.x):
 		for dz in range(grid_size.y):
 			placement_grid.remove_blocked_cell(Vector2i(
+				grid_pos.x + dx - grid_size.x / 2,
+				grid_pos.y + dz - grid_size.y / 2
+			))
+
+## Add static blocked area (for obstacles that never move)
+func add_static_blocked_area(world_pos: Vector3, grid_size: Vector2i) -> void:
+	var grid_pos = placement_grid.world_to_grid(world_pos)
+	for dx in range(grid_size.x):
+		for dz in range(grid_size.y):
+			placement_grid.add_static_blocked_cell(Vector2i(
 				grid_pos.x + dx - grid_size.x / 2,
 				grid_pos.y + dz - grid_size.y / 2
 			))

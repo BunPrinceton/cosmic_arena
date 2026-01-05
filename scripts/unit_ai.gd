@@ -1,0 +1,416 @@
+extends Node3D
+class_name UnitAI
+
+## AI controller for deployed units
+## Handles movement along lanes, target acquisition, and combat
+
+signal target_acquired(target: Node3D)
+signal target_lost()
+signal arrived_at_target()
+signal unit_attacked(attacker: Node3D)
+
+enum AIState {
+	ADVANCING,      # Moving toward objective
+	ATTACKING,      # In range, attacking target
+	RESPONDING,     # Responding to threat
+	IDLE            # Victory/defeat, do nothing
+}
+
+enum Lane {
+	LEFT,
+	RIGHT
+}
+
+# Configuration
+@export var move_speed: float = 2.0  # Units per second
+@export var attack_range: float = 5.0  # Distance to start attacking
+@export var vision_range: float = 15.0  # Distance to detect enemies
+@export var lane_adherence: float = 0.5  # How strongly to stay in lane (0-1)
+
+# Team: 0 = player, 1 = enemy
+var team: int = 0
+
+# State
+var current_state: AIState = AIState.ADVANCING
+var current_lane: Lane = Lane.LEFT
+var current_target: Node3D = null
+var spawn_position: Vector3 = Vector3.ZERO
+
+# Obstacle avoidance - reactive (when stuck)
+var stuck_timer: float = 0.0
+var last_position: Vector3 = Vector3.ZERO
+var avoidance_direction: int = 0  # -1 = left, 0 = none, 1 = right
+var avoidance_timer: float = 0.0
+const STUCK_THRESHOLD: float = 0.3  # Time before considering stuck
+const AVOIDANCE_DURATION: float = 0.8  # How long to avoid before rechecking
+const STUCK_DISTANCE: float = 0.1  # Movement threshold to detect stuck
+
+# Obstacle avoidance - proactive (raycast ahead)
+const OBSTACLE_SIGHT_RANGE: float = 8.0  # How far ahead to look for obstacles
+const OBSTACLE_SIDE_ANGLE: float = 0.5  # Radians (~30 degrees) for side rays
+var proactive_avoidance: int = 0  # -1 = steer left, 0 = none, 1 = steer right
+
+# Lane positions
+const LEFT_LANE_X: float = -15.0
+const RIGHT_LANE_X: float = 15.0
+const LANE_WIDTH: float = 8.0
+
+# Base positions
+const PLAYER_BASE_Z: float = 50.0
+const ENEMY_BASE_Z: float = -50.0
+
+# References (set by parent)
+var enemy_base: Node3D = null
+var player_base: Node3D = null
+var towers: Array[Node3D] = []
+var parent_unit: Node3D = null
+
+func _ready() -> void:
+	spawn_position = global_position
+	_determine_lane()
+
+func setup(p_team: int, p_move_speed: float, p_attack_range: float, p_parent: Node3D) -> void:
+	team = p_team
+	move_speed = p_move_speed
+	attack_range = p_attack_range
+	parent_unit = p_parent
+	spawn_position = global_position
+	_determine_lane()
+
+func set_bases(p_player_base: Node3D, p_enemy_base: Node3D) -> void:
+	player_base = p_player_base
+	enemy_base = p_enemy_base
+
+func set_towers(p_towers: Array[Node3D]) -> void:
+	towers = p_towers
+
+func _determine_lane() -> void:
+	# Determine lane based on spawn X position
+	if spawn_position.x < 0:
+		current_lane = Lane.LEFT
+	else:
+		current_lane = Lane.RIGHT
+
+func get_lane_center_x() -> float:
+	return LEFT_LANE_X if current_lane == Lane.LEFT else RIGHT_LANE_X
+
+func _physics_process(delta: float) -> void:
+	if current_state == AIState.IDLE:
+		return
+
+	match current_state:
+		AIState.ADVANCING:
+			_process_advancing(delta)
+		AIState.ATTACKING:
+			_process_attacking(delta)
+		AIState.RESPONDING:
+			_process_responding(delta)
+
+func _process_advancing(delta: float) -> void:
+	# Check for targets in range
+	var new_target = _find_priority_target()
+	if new_target and _is_in_attack_range(new_target):
+		current_target = new_target
+		current_state = AIState.ATTACKING
+		target_acquired.emit(current_target)
+		return
+
+	# Move toward objective
+	var objective_pos = _get_objective_position()
+	if objective_pos == Vector3.ZERO:
+		return
+
+	# Calculate movement direction
+	var direction = _calculate_movement_direction(objective_pos)
+
+	# Apply movement
+	_move(direction, delta)
+
+	# Check if arrived at objective
+	var distance_to_objective = global_position.distance_to(objective_pos)
+	if distance_to_objective < attack_range:
+		if current_target:
+			current_state = AIState.ATTACKING
+			arrived_at_target.emit()
+
+func _process_attacking(delta: float) -> void:
+	if not is_instance_valid(current_target):
+		# Target destroyed, find new one
+		current_target = null
+		current_state = AIState.ADVANCING
+		target_lost.emit()
+		return
+
+	# Check if still in range
+	if not _is_in_attack_range(current_target):
+		# Move closer
+		var direction = (current_target.global_position - global_position).normalized()
+		direction.y = 0
+		_move(direction, delta)
+	# else: Stay in place and attack (attack logic handled by PlacedUnit)
+
+func _process_responding(delta: float) -> void:
+	if not is_instance_valid(current_target):
+		# Threat eliminated, resume advancing
+		current_target = null
+		current_state = AIState.ADVANCING
+		target_lost.emit()
+		return
+
+	# Move toward threat
+	var direction = (current_target.global_position - global_position).normalized()
+	direction.y = 0
+	_move(direction, delta)
+
+	# If in range, start attacking
+	if _is_in_attack_range(current_target):
+		current_state = AIState.ATTACKING
+
+func _find_priority_target() -> Node3D:
+	# Priority: 1. Enemy units in vision, 2. Towers, 3. Enemy base
+
+	# Check for enemy units in vision range
+	var enemy_unit = _find_nearest_enemy_unit()
+	if enemy_unit and global_position.distance_to(enemy_unit.global_position) <= vision_range:
+		return enemy_unit
+
+	# Check for towers in our lane
+	var lane_tower = _find_lane_tower()
+	if lane_tower:
+		return lane_tower
+
+	# Default to enemy base
+	if team == 0:
+		return enemy_base
+	else:
+		return player_base
+
+func _find_nearest_enemy_unit() -> Node3D:
+	var units_node = get_tree().get_first_node_in_group("placed_units")
+	if not units_node:
+		return null
+
+	var nearest: Node3D = null
+	var nearest_dist: float = INF
+
+	for unit in units_node.get_children():
+		if not is_instance_valid(unit):
+			continue
+		if unit == parent_unit:
+			continue
+		if unit.has_method("get_team") and unit.get_team() != team:
+			var dist = global_position.distance_to(unit.global_position)
+			if dist < nearest_dist:
+				nearest_dist = dist
+				nearest = unit
+
+	return nearest
+
+func _find_lane_tower() -> Node3D:
+	# Find tower in our lane that's still alive
+	for tower in towers:
+		if not is_instance_valid(tower):
+			continue
+		# Check if tower is in our lane
+		var tower_lane = Lane.LEFT if tower.global_position.x < 0 else Lane.RIGHT
+		if tower_lane == current_lane:
+			# Check if tower is between us and enemy base
+			if team == 0:  # Player team, enemy towers are at negative Z
+				if tower.global_position.z < global_position.z:
+					return tower
+			else:  # Enemy team
+				if tower.global_position.z > global_position.z:
+					return tower
+	return null
+
+func _get_objective_position() -> Vector3:
+	# Get position to move toward
+	if current_target and is_instance_valid(current_target):
+		return current_target.global_position
+
+	# No specific target, move toward enemy base
+	var target_z: float
+	if team == 0:
+		target_z = ENEMY_BASE_Z
+	else:
+		target_z = PLAYER_BASE_Z
+
+	return Vector3(get_lane_center_x(), 0, target_z)
+
+func _calculate_movement_direction(objective: Vector3) -> Vector3:
+	# Primary direction: toward objective
+	var to_objective = objective - global_position
+	to_objective.y = 0
+	var direction = to_objective.normalized()
+
+	# Lane adherence: pull toward lane center
+	var lane_x = get_lane_center_x()
+	var x_offset = lane_x - global_position.x
+
+	# Blend lane correction with forward movement
+	if abs(x_offset) > 1.0:
+		direction.x = lerp(direction.x, sign(x_offset), lane_adherence)
+		direction = direction.normalized()
+
+	# Proactive obstacle avoidance (raycast ahead)
+	_check_obstacles_ahead(direction)
+
+	# Apply proactive avoidance first (smooth steering)
+	if proactive_avoidance != 0 and avoidance_direction == 0:
+		# Gentle steering - blend with forward direction
+		var steer_dir = Vector3(-direction.z, 0, direction.x) * proactive_avoidance
+		direction = (direction * 0.6 + steer_dir * 0.4).normalized()
+
+	# Apply reactive avoidance if stuck (stronger, overrides proactive)
+	if avoidance_direction != 0:
+		# Get perpendicular direction (rotate 90 degrees)
+		var avoid_dir = Vector3(-direction.z, 0, direction.x) * avoidance_direction
+		# Blend avoidance with forward movement (more lateral, less forward)
+		direction = (direction * 0.3 + avoid_dir * 0.7).normalized()
+
+	return direction
+
+func _check_obstacles_ahead(move_direction: Vector3) -> void:
+	if not parent_unit:
+		return
+
+	var space_state = parent_unit.get_world_3d().direct_space_state
+	var ray_origin = parent_unit.global_position + Vector3(0, 0.5, 0)  # Slightly above ground
+
+	# Cast rays: center, left, and right
+	var center_blocked = _raycast_for_obstacle(space_state, ray_origin, move_direction, OBSTACLE_SIGHT_RANGE)
+	var left_dir = move_direction.rotated(Vector3.UP, OBSTACLE_SIDE_ANGLE)
+	var right_dir = move_direction.rotated(Vector3.UP, -OBSTACLE_SIDE_ANGLE)
+	var left_blocked = _raycast_for_obstacle(space_state, ray_origin, left_dir, OBSTACLE_SIGHT_RANGE * 0.7)
+	var right_blocked = _raycast_for_obstacle(space_state, ray_origin, right_dir, OBSTACLE_SIGHT_RANGE * 0.7)
+
+	# Decide steering direction
+	if center_blocked:
+		if left_blocked and not right_blocked:
+			proactive_avoidance = 1  # Steer right
+		elif right_blocked and not left_blocked:
+			proactive_avoidance = -1  # Steer left
+		elif not left_blocked and not right_blocked:
+			# Both sides clear, prefer toward lane center
+			var lane_x = get_lane_center_x()
+			proactive_avoidance = 1 if parent_unit.global_position.x < lane_x else -1
+		else:
+			# Both sides blocked, pick based on lane
+			var lane_x = get_lane_center_x()
+			proactive_avoidance = 1 if parent_unit.global_position.x < lane_x else -1
+	elif left_blocked and not right_blocked:
+		proactive_avoidance = 1  # Obstacle on left, steer right
+	elif right_blocked and not left_blocked:
+		proactive_avoidance = -1  # Obstacle on right, steer left
+	else:
+		proactive_avoidance = 0  # Path is clear
+
+func _raycast_for_obstacle(space_state: PhysicsDirectSpaceState3D, origin: Vector3, direction: Vector3, distance: float) -> bool:
+	var query = PhysicsRayQueryParameters3D.create(origin, origin + direction * distance)
+	query.exclude = [parent_unit.get_rid()] if parent_unit else []
+	query.collision_mask = 1  # Only check layer 1 (obstacles/ground)
+
+	var result = space_state.intersect_ray(query)
+	if result:
+		# Check if it's an obstacle (not ground - ground normal points up)
+		var normal = result.normal as Vector3
+		if normal.y < 0.8:  # Not a floor (floor normal is mostly up)
+			return true
+	return false
+
+func _move(direction: Vector3, delta: float) -> void:
+	if direction.length() < 0.01:
+		return
+
+	# Move the parent unit using CharacterBody3D velocity
+	if parent_unit and parent_unit is CharacterBody3D:
+		var body = parent_unit as CharacterBody3D
+		var pos_before = body.global_position
+
+		# Set base movement velocity, soft collision push is added on top
+		body.velocity.x = direction.x * move_speed
+		body.velocity.z = direction.z * move_speed
+
+		# Apply gravity if not on floor
+		if not body.is_on_floor():
+			body.velocity.y -= 20.0 * delta
+		else:
+			body.velocity.y = 0
+
+		# Move with collision
+		body.move_and_slide()
+
+		# Check if we're stuck (colliding but not moving)
+		var pos_after = body.global_position
+		var actual_movement = pos_after.distance_to(pos_before)
+		var expected_movement = move_speed * delta
+
+		_update_obstacle_avoidance(actual_movement, expected_movement, delta)
+
+		# Rotate to face movement direction (use original direction, not avoidance)
+		if direction.length() > 0.1 and avoidance_direction == 0:
+			var target_angle = atan2(direction.x, direction.z)
+			parent_unit.rotation.y = lerp_angle(parent_unit.rotation.y, target_angle, 5.0 * delta)
+	elif parent_unit:
+		# Fallback for non-CharacterBody3D (shouldn't happen)
+		parent_unit.global_position += direction * move_speed * delta
+
+func _update_obstacle_avoidance(actual_movement: float, expected_movement: float, delta: float) -> void:
+	# Decrease avoidance timer
+	if avoidance_timer > 0:
+		avoidance_timer -= delta
+		if avoidance_timer <= 0:
+			avoidance_direction = 0  # Stop avoiding, try normal path
+
+	# Check if stuck (moving much less than expected)
+	if actual_movement < expected_movement * 0.3:
+		stuck_timer += delta
+
+		if stuck_timer > STUCK_THRESHOLD and avoidance_direction == 0:
+			# Start avoiding - pick a direction
+			# Prefer the direction toward lane center
+			var lane_x = get_lane_center_x()
+			if global_position.x < lane_x:
+				avoidance_direction = 1  # Go right (toward lane)
+			else:
+				avoidance_direction = -1  # Go left (toward lane)
+
+			avoidance_timer = AVOIDANCE_DURATION
+			stuck_timer = 0
+			print("Unit stuck, avoiding %s" % ("right" if avoidance_direction > 0 else "left"))
+
+		elif stuck_timer > STUCK_THRESHOLD and avoidance_timer <= 0:
+			# Still stuck after avoiding, try the other direction
+			avoidance_direction = -avoidance_direction
+			avoidance_timer = AVOIDANCE_DURATION
+			stuck_timer = 0
+			print("Still stuck, trying %s" % ("right" if avoidance_direction > 0 else "left"))
+	else:
+		# Moving fine, reset stuck timer
+		stuck_timer = 0
+		# If we were avoiding and now moving, we can stop avoiding sooner
+		if avoidance_direction != 0 and actual_movement > expected_movement * 0.7:
+			avoidance_timer = min(avoidance_timer, 0.2)  # Finish avoidance soon
+
+func _is_in_attack_range(target: Node3D) -> bool:
+	if not is_instance_valid(target):
+		return false
+	var dist = global_position.distance_to(target.global_position)
+	return dist <= attack_range
+
+func on_attacked_by(attacker: Node3D) -> void:
+	# Respond to being attacked
+	unit_attacked.emit(attacker)
+
+	if current_state != AIState.ATTACKING:
+		current_target = attacker
+		current_state = AIState.RESPONDING
+
+func set_idle() -> void:
+	current_state = AIState.IDLE
+
+func get_current_target() -> Node3D:
+	return current_target
+
+func is_attacking() -> bool:
+	return current_state == AIState.ATTACKING
