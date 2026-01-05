@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=4 uid="uid://caiwqyhaaige4"]
+[gd_scene load_steps=59 format=4 uid="uid://caiwqyhaaige4"]
 
 [ext_resource type="Texture2D" uid="uid://bad677qsbjcue" path="res://assets/textures/greyish-green-mossy-rock.jpg" id="1_bghdn"]
 [ext_resource type="Script" path="res://scripts/player_3d.gd" id="1_player"]
@@ -27,6 +27,9 @@
 [ext_resource type="PackedScene" uid="uid://dc5ktf34vfe2d" path="res://assets/models/environment/trees/PineTree_3.glb" id="19_ikac7"]
 [ext_resource type="PackedScene" uid="uid://dva3w3aljf4ty" path="res://assets/models/environment/trees/PineTree_4.glb" id="20_hi0in"]
 [ext_resource type="PackedScene" uid="uid://bbm3tecl3gfxd" path="res://assets/models/environment/trees/PineTree_5.glb" id="21_3rh45"]
+[ext_resource type="PackedScene" uid="uid://cn6yr1jfhh7ym" path="res://assets/models/environment/rocks/sample.glb" id="28_ypwn2"]
+[ext_resource type="PackedScene" uid="uid://trcrv5xljp4o" path="res://assets/models/fence.glb" id="29_cll5n"]
+[ext_resource type="Script" path="res://scripts/main_3d_controller.gd" id="main_3d_ctrl"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_ta7nc"]
 agent_height = 1.8
@@ -42,18 +45,6 @@ uv1_scale = Vector3(20, 20, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(60, 0.5, 100)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_rstky"]
-size = Vector3(10, 3, 3)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qavsd"]
-albedo_texture = ExtResource("1_bghdn")
-uv1_scale = Vector3(2, 2, 2)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xftd6"]
-albedo_color = Color(0.423651, 0.423651, 0.423651, 1)
-albedo_texture = ExtResource("1_bghdn")
-uv1_scale = Vector3(2, 2, 2)
 
 [sub_resource type="BoxMesh" id="BoxMesh_lane"]
 size = Vector3(8, 0.6, 100)
@@ -91,6 +82,18 @@ size = Vector3(22.5, 3, 2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_base"]
 size = Vector3(15, 6, 15)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rstky"]
+size = Vector3(10, 3, 3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qavsd"]
+albedo_texture = ExtResource("1_bghdn")
+uv1_scale = Vector3(2, 2, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xftd6"]
+albedo_color = Color(0.423651, 0.423651, 0.423651, 1)
+albedo_texture = ExtResource("1_bghdn")
+uv1_scale = Vector3(2, 2, 2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vjoqh"]
 resource_name = "Rock"
@@ -182,6 +185,7 @@ radius = 1.0
 height = 4.0
 
 [node name="Main3D" type="Node3D"]
+script = ExtResource("main_3d_ctrl")
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_ta7nc")
@@ -236,7 +240,7 @@ transform = Transform3D(0.377146, 0, -0.926154, 0, 1, 0, 0.926154, 0, 0.377146, 
 transform = Transform3D(0.377146, 0, -0.926154, 0, 1, 0, 0.926154, 0, 0.377146, -35.5602, 0.04708, -24.9595)
 
 [node name="Rock_34" parent="Ground/Rock_52" instance=ExtResource("11_k8d88")]
-transform = Transform3D(0.377146, 0, -0.926154, 0, 1, 0, 0.926154, 0, 0.377146, -30.7793, 0.04708, -21.2641)
+transform = Transform3D(0.377146, 0, -0.926154, 0, 1, 0, 0.926154, 0, 0.377146, -31.7876, 0.04708, -24.0334)
 
 [node name="Rock_44" parent="Ground/Rock_52" instance=ExtResource("12_kyfdu")]
 transform = Transform3D(0.377146, 0, -0.926154, 0, 1, 0, 0.926154, 0, 0.377146, -32.523, 0.04708, -19.7284)
@@ -476,614 +480,6 @@ transform = Transform3D(1.75011, 0, 0, 0, 1.94012, 0, 0, 0, 1.94431, -31.07, -0.
 
 [node name="NormalTree_35" parent="Ground/wall-trees-rocks" instance=ExtResource("15_uho61")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.1129, 0.5, -13.2396)
-
-[node name="RigidBody3D" type="RigidBody3D" parent="Ground/wall-trees-rocks/NormalTree_35"]
-transform = Transform3D(0.0398005, 0, 0.999208, 0, 1, 0, -0.999208, 0, 0.0398005, -0.398205, 0, -5.01993)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48608, 0)
-shape = SubResource("BoxShape3D_rstky")
-disabled = true
-
-[node name="Rock_12" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D" instance=ExtResource("2_dn385")]
-transform = Transform3D(1.06513, 0, 1.69278, 0, 2, 0, -1.69278, 0, 1.06513, -4.42794, -0.0281084, 0.888975)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.141276, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_22" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.45268, 0, -0.71943, 0, 0.85, 0, 0.71943, 0, 0.45268, 1.34007, -0.1625, 2.20107)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_22" index="0"]
-transform = Transform3D(1, 0, -3.72529e-09, 0, 1, 0, 3.72529e-09, 0, 1, -1.05497, -0.0812826, -0.0103168)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_23" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.94058, 0, 0.133444, 0, 0.95, 0, -0.133444, 0, 0.94058, 2.06064, -0.21251, 2.65836)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_23" index="0"]
-transform = Transform3D(1, 0, 1.49012e-07, 0, 1, 0, -1.49012e-07, 0, 1, -0.703045, 0, -2.69838)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_24" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(-0.88599, -0.0749581, 0.334519, -0.0463316, 0.944689, 0.0889718, -0.339669, 0.0666624, -0.884693, 1.47943, -0.398356, 1.12827)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_24" index="0"]
-transform = Transform3D(1, 9.31323e-10, 0, 1.86265e-09, 1, -1.21072e-08, 0, -2.32831e-09, 1, 4.19333, -0.0155867, 2.84909)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.899279, -0.0789033, 0.4302, -0.0406248, 0.994409, 0.0974645, -0.435485, 0.070171, -0.897457, -0.109638, -0.418048, 0.376588)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_14" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.996876, -0.0789033, 0.00346789, 0.078952, 0.99441, -0.0701162, 0.00208384, 0.070171, 0.997533, -0.234192, -0.381675, -0.278926)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_14" index="0"]
-transform = Transform3D(0.999256, -0.038554, -0.00108427, 0.038554, 0.997676, 0.0561806, -0.0010843, -0.0561806, 0.99842, -0.00216484, 0.0196456, -0.00315475)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_14" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.920106, -0.038554, -0.389769, 0.0573741, 0.997676, 0.0367545, 0.387446, -0.0561806, 0.920179, 0.392349, -0.142219, -1.91324)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_14/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_16" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998058, -0.038554, -0.0489325, -0.0356937, 0.997676, -0.05804, 0.0510565, -0.0561806, -0.997115, 1.90195, -0.157482, 0.774002)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_16" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_17" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.389059, 0, 1, 0, 0.389059, 0, 0.921213, 1.7467, -0.0693889, 0.124279)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_17" index="0"]
-transform = Transform3D(0.93863, -0.328221, -0.106039, 0.213112, 0.793576, -0.56993, 0.271213, 0.512355, 0.814823, -0.0283184, 0.321513, 0.0928335)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_18" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.1982, -0.0693898, -0.229251)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_18" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.987578, 0, -1.73917, 0, 2, 0, 1.73917, 0, -0.987578, 3.33157, -0.0281084, -1.66532)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_22" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.45268, 0, -0.71943, 0, 0.85, 0, 0.71943, 0, 0.45268, 1.34007, -0.0212235, 2.20107)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_22" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0833, -0.0812826, -0.721494)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_23" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.94058, 0, 0.133444, 0, 0.95, 0, -0.133444, 0, 0.94058, 2.06064, -0.071234, 2.65836)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_23" index="0"]
-transform = Transform3D(1, 0, 1.49012e-07, 0, 1, 0, -1.49012e-07, 0, 1, -0.703045, 0, -2.69838)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_24" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(-0.887588, 0, 0.338655, 0, 0.95, 0, -0.338655, 0, -0.887588, 2.36265, -0.0530535, 2.44826)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_24" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.22296, 0, 2.17828)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.775426, 9.53674e-07, 1.6943)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_15" index="0"]
-transform = Transform3D(1.18085, -0.648186, -0.0293279, 0.264374, 1.57926, -0.157013, 0.340144, 1.02279, 0.223853, -0.158155, 0.173506, 0.252504)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_14" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.652769, 0, 1.03742)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_14" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_14" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.38906, 0, 1, 0, 0.38906, 0, 0.921213, 0.390052, -0.0693889, -1.91659)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_14/Rock_15" index="0"]
-transform = Transform3D(0.807211, -0.0796937, -0.584859, 0.196276, 0.9707, 0.138628, 0.556674, -0.226696, 0.799201, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_16" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.90208, -0.0693898, 0.774196)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_16" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_17" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.389059, 0, 1, 0, 0.389059, 0, 0.921213, 1.7467, -0.0693889, 0.124279)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_17" index="0"]
-transform = Transform3D(0.796149, -0.194119, -0.600239, 0.199416, 2.45944, 0.140846, 0.571296, -0.587967, 0.787321, 0, -0.0693055, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_18" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.1982, -0.0693898, -0.229251)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_18" index="0"]
-transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 0, -0.409694, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_13" index="0"]
-transform = Transform3D(0.939434, -0.325714, -0.106648, 0.210325, 0.793576, -0.570964, 0.270604, 0.513953, 0.814019, -0.290451, 0.020562, 0.412624)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="RigidBody3D" type="RigidBody3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D"]
-transform = Transform3D(1, 0, -3.72529e-09, 0, 1, 0, 3.72529e-09, 0, 1, 9.68666, 0, -0.144863)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48608, 0)
-shape = SubResource("BoxShape3D_rstky")
-disabled = true
-
-[node name="Rock_12" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D" instance=ExtResource("2_dn385")]
-transform = Transform3D(1.06513, 0, 1.69278, 0, 2, 0, -1.69278, 0, 1.06513, -4.42794, -0.0281084, 0.888975)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" index="0"]
-transform = Transform3D(0.995561, 0.0938952, -0.00646842, -0.0938952, 0.986135, -0.136823, -0.00646836, 0.136823, 0.990574, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_22" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.45268, 0, -0.71943, 0, 0.85, 0, 0.71943, 0, 0.45268, 1.34007, -0.0212235, 2.20107)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_22" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0833, -0.0812826, -0.721494)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_23" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.94058, 0, 0.133444, 0, 0.95, 0, -0.133444, 0, 0.94058, 2.06064, -0.071234, 2.65836)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_23" index="0"]
-transform = Transform3D(1, 0, 1.19209e-07, 0, 1, 0, -1.19209e-07, 0, 1, -0.703045, 0.629321, -2.69838)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_24" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(-0.887588, 0, 0.338655, 0, 0.95, 0, -0.338655, 0, -0.887588, 2.36265, -0.0530535, 2.44826)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_24" index="0"]
-transform = Transform3D(1, 0, 5.96046e-08, 0, 1, 0, -5.96046e-08, 0, 1, 3.22296, 0.696444, 2.17828)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.775426, 9.53674e-07, 1.6943)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_15" index="0"]
-transform = Transform3D(0.997553, 0.0697909, 0.004278, -0.0697909, 0.990075, 0.121985, 0.00427794, -0.121985, 0.992523, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_14" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.652769, 0, 1.03742)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_14" index="0"]
-transform = Transform3D(0.40724, -0.547411, -0.731092, -0.154119, 0.74781, -0.645777, 0.900224, 0.375662, 0.220172, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_14" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.38906, 0, 1, 0, 0.38906, 0, 0.921213, 0.390052, -0.0693889, -1.91659)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_14/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_16" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.90208, -0.0693898, 0.774196)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_16" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_17" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.389059, 0, 1, 0, 0.389059, 0, 0.921213, 1.7467, -0.0693889, 0.124279)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_17" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_18" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.1982, -0.0693898, -0.229251)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_18" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_13" index="0"]
-transform = Transform3D(0.998993, 0.0448266, 0.00175971, -0.0448266, 0.995918, 0.0783506, 0.00175965, -0.0783506, 0.996924, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.987578, 0, -1.73917, 0, 2, 0, 1.73917, 0, -0.987578, 3.33157, -0.0281084, -1.66532)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_22" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.45268, 0, -0.71943, 0, 0.85, 0, 0.71943, 0, 0.45268, 1.34007, -0.0212235, 2.20107)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_22" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0833, 0.311257, -0.721493)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_23" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.94058, 0, 0.133444, 0, 0.95, 0, -0.133444, 0, 0.94058, 2.06064, -0.071234, 2.65836)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_23" index="0"]
-transform = Transform3D(0.105853, 0.725768, 0.679747, -0.297553, 0.675384, -0.674773, -0.948819, -0.130834, 0.287446, -0.353621, 0, -2.96278)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_24" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(-0.887588, 0, 0.338655, 0, 0.95, 0, -0.338655, 0, -0.887588, 2.36265, -0.0530535, 2.44826)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_24" index="0"]
-transform = Transform3D(1, 0, -2.98023e-08, 0, 1.74844, 0, 2.98023e-08, 0, 1, 3.19695, 0.0694176, 2.5434)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.775426, 9.53674e-07, 1.6943)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_14" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.652769, 0, 1.03742)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_14" index="0"]
-transform = Transform3D(0.998682, -0.0512859, -0.00212026, 0.0512859, 0.995272, 0.0824878, -0.0021202, -0.0824878, 0.99659, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_14" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.38906, 0, 1, 0, 0.38906, 0, 0.921213, 0.390052, -0.0693889, -1.91659)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_14/Rock_15" index="0"]
-transform = Transform3D(0.984158, 0.0571201, -0.16784, -0.0630545, 0.997552, -0.0302393, 0.165702, 0.0403433, 0.985351, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_16" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.90208, -0.0693898, 0.774196)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_16" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_17" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.389059, 0, 1, 0, 0.389059, 0, 0.921213, 1.7467, -0.0693889, 0.124279)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_17" index="0"]
-transform = Transform3D(-1.41441, -0.123081, 1.62969, -0.113348, 1.62829, 0.120061, -2.18426, -0.00479548, -1.06154, -1.23256, 0.591186, 0.722943)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_18" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.1982, -0.0693898, -0.229251)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_18" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="RigidBody3D" type="RigidBody3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.50875, 0, -0.378754)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48608, 0)
-shape = SubResource("BoxShape3D_rstky")
-disabled = true
-
-[node name="Rock_12" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D" instance=ExtResource("2_dn385")]
-transform = Transform3D(1.06513, 0, 1.69278, 0, 2, 0, -1.69278, 0, 1.06513, -4.42794, -0.0281084, 0.888975)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_22" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.45268, 0, -0.71943, 0, 0.85, 0, 0.71943, 0, 0.45268, 1.34007, -0.0212235, 2.20107)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_22" index="0"]
-transform = Transform3D(1.25836, 0, 1.11759e-08, 0, 1.17138, 0, -2.6077e-08, 0, 1.19046, -1.0833, 0.262077, -0.721495)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_23" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.94058, 0, 0.133444, 0, 0.95, 0, -0.133444, 0, 0.94058, 2.06064, -0.071234, 2.65836)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_23" index="0"]
-transform = Transform3D(1, 0, 1.49012e-07, 0, 1, 0, -1.49012e-07, 0, 1, -0.703045, 0, -2.69838)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_24" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(-0.887588, 0, 0.338655, 0, 0.95, 0, -0.338655, 0, -0.887588, 2.36265, -0.0530535, 2.44826)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_24" index="0"]
-transform = Transform3D(1, 0, 1.19209e-07, 0, 1, 0, -1.19209e-07, 0, 1, 2.95365, 0.516509, 1.99211)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.775426, 9.53674e-07, 1.6943)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_15" index="0"]
-transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 0.0419216, 0, -0.0732718)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_14" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.652769, 0, 1.03742)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14" index="0"]
-transform = Transform3D(0.972088, -0.218219, -0.0861695, 0.209927, 0.973006, -0.0958639, 0.104763, 0.0750989, 0.991658, -0.0417099, 0, -0.0607767)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.38906, 0, 1, 0, 0.38906, 0, 0.921213, 0.390052, -0.0693889, -1.91659)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_16" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.90208, -0.0693898, 0.774196)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_16" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_17" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.389059, 0, 1, 0, 0.389059, 0, 0.921213, 1.7467, -0.0693889, 0.124279)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_17" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_18" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.1982, -0.0693898, -0.229251)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_18" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.987578, 0, -1.73917, 0, 2, 0, 1.73917, 0, -0.987578, 3.33157, -0.0281084, -1.66532)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_22" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.45268, 0, -0.71943, 0, 0.85, 0, 0.71943, 0, 0.45268, 1.34007, -0.0212235, 2.20107)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_22" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0833, -0.0812826, -0.721494)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_23" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.94058, 0, 0.133444, 0, 0.95, 0, -0.133444, 0, 0.94058, 2.06064, -0.071234, 2.65836)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_23" index="0"]
-transform = Transform3D(1, 0, 1.49012e-07, 0, 1, 0, -1.49012e-07, 0, 1, -0.703045, 0, -2.69838)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_24" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(-0.887588, 0, 0.338655, 0, 0.95, 0, -0.338655, 0, -0.887588, 2.36265, -0.0530535, 2.44826)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_24" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.22296, 0, 2.17828)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.775426, 9.53674e-07, 1.6943)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_14" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.652769, 0, 1.03742)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.38906, 0, 1, 0, 0.38906, 0, 0.921213, 0.390052, -0.0693889, -1.91659)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_16" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.90208, -0.0693898, 0.774196)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_16" index="0"]
-transform = Transform3D(2.81922, -1.38307, 0.667589, 2.10332, 1.61191, -1.17599, 0.326726, 1.5573, 1.81013, 1.57815, 0.801414, -0.896371)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_17" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.389059, 0, 1, 0, 0.389059, 0, 0.921213, 1.7467, -0.0693889, 0.124279)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_17" index="0"]
-transform = Transform3D(0.977055, -0.21237, -0.0162059, 0.21237, 0.965609, 0.149995, -0.0162059, -0.149995, 0.988554, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_18" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.1982, -0.0693898, -0.229251)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_18" index="0"]
-transform = Transform3D(0.742431, 0.213407, -0.635022, -0.0822734, 0.969774, 0.229715, 0.664851, -0.118302, 0.737548, 0.148546, -0.238263, -0.0993471)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="RigidBody3D" type="RigidBody3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D"]
-transform = Transform3D(0.996859, 0, 0.0791724, 0, 1.77957, 0, -0.0791724, 0, 0.996859, 9.56954, -9.53674e-07, -0.600792)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48608, 0)
-shape = SubResource("BoxShape3D_rstky")
-disabled = true
-
-[node name="Rock_12" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D" instance=ExtResource("2_dn385")]
-transform = Transform3D(1.06513, 0, 1.69278, 0, 2, 0, -1.69278, 0, 1.06513, -4.42794, -0.0281084, 0.888975)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" index="0"]
-transform = Transform3D(1, 0, 0, 0, 0.685488, 0, 0, 0, 1, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_22" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.45268, 0, -0.71943, 0, 0.85, 0, 0.71943, 0, 0.45268, 1.34007, -0.0212235, 2.20107)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_22" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0833, -0.0812826, -0.721494)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_23" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.94058, 0, 0.133444, 0, 0.95, 0, -0.133444, 0, 0.94058, 2.06064, -0.071234, 2.65836)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_23" index="0"]
-transform = Transform3D(1.37333, 0, 8.9407e-08, 0, 1, 0, -1.49012e-07, 0, 0.850348, -0.703047, 0, -2.69838)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_24" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(-0.887588, 0, 0.338655, 0, 0.95, 0, -0.338655, 0, -0.887588, 2.36265, -0.0530535, 2.44826)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_24" index="0"]
-transform = Transform3D(2.00561, 0, 0, 0, 1, 0, -5.96046e-08, 0, 1.82007, 3.22296, 0, 2.17828)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.775426, 9.53674e-07, 1.6943)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_14" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.652769, 0, 1.03742)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14" index="0"]
-transform = Transform3D(1.5416, 0, 2.98023e-08, 0, 0.680857, 0, -5.96046e-08, 0, 0.688326, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.38906, 0, 1, 0, 0.38906, 0, 0.921213, 0.390052, -0.0693889, -1.91659)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14/Rock_15" index="0"]
-transform = Transform3D(0.545922, 0, -2.98023e-08, 0, 2.20707, 0, 0, 0, 0.655522, 0, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_16" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.90208, -0.0693898, 0.774196)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_16" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_17" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.389059, 0, 1, 0, 0.389059, 0, 0.921213, 1.7467, -0.0693889, 0.124279)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_17" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_18" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.1982, -0.0693898, -0.229251)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_18" index="0"]
-transform = Transform3D(0.4826, 0, 0.193634, 0, 0.465481, 0, -1.88438, 0, 0.0495908, 0.0292511, -0.000917835, -3.51522)
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.987578, 0, -1.73917, 0, 2, 0, 1.73917, 0, -0.987578, 3.33157, -0.0281084, -1.66532)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_22" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.45268, 0, -0.71943, 0, 0.85, 0, 0.71943, 0, 0.45268, 1.34007, -0.0212235, 2.20107)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_22" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0833, -0.0812826, -0.721494)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_23" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(0.94058, 0, 0.133444, 0, 0.95, 0, -0.133444, 0, 0.94058, 2.06064, -0.071234, 2.65836)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_23" index="0"]
-transform = Transform3D(1, 0, 1.49012e-07, 0, 1, 0, -1.49012e-07, 0, 1, -0.703045, 0, -2.69838)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_24" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("4_o7y3g")]
-transform = Transform3D(-0.887588, 0, 0.338655, 0, 0.95, 0, -0.338655, 0, -0.887588, 2.36265, -0.0530535, 2.44826)
-
-[node name="Rock_2" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_24" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.22296, 0, 2.17828)
-surface_material_override/0 = SubResource("StandardMaterial3D_xftd6")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.775426, 9.53674e-07, 1.6943)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_14" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.652769, 0, 1.03742)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_15" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.38906, 0, 1, 0, 0.38906, 0, 0.921213, 0.390052, -0.0693889, -1.91659)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14/Rock_15" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_16" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.90208, -0.0693898, 0.774196)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_16" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_17" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(0.921213, 0, -0.389059, 0, 1, 0, 0.389059, 0, 0.921213, 1.7467, -0.0693889, 0.124279)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_17" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_18" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.998747, 0, -0.0500526, 0, 1, 0, 0.0500526, 0, -0.998747, 1.1982, -0.0693898, -0.229251)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_18" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
-
-[node name="Rock_13" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.900585, 0, 0.434681, 0, 1, 0, -0.434681, 0, -0.900585, 0.122657, 9.53674e-07, 0.656879)
-
-[node name="Rock_1" parent="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_13" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_qavsd")
 
 [node name="PineTree_14" parent="Ground/wall-trees-rocks" instance=ExtResource("17_sd5nt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.3391, 0.75, -9.76148)
@@ -3069,7 +2465,7 @@ transform = Transform3D(-0.99395, -0.0210249, 0.107808, 0.00360401, 0.974738, 0.
 transform = Transform3D(-0.951723, 0, -0.306958, 0, 1, 0, 0.306958, 0, -0.951723, 0.969471, 0.25, 0.260525)
 
 [node name="Rock_13" parent="Ground/flat-trees-rocks-2/flat-trees-rocks-2/flat-trees-rocks-2/MapleTree_12/wall-trees-rocks/MapleTree_33/NormalTree_52/Rock_52" instance=ExtResource("2_dn385")]
-transform = Transform3D(-0.984056, 0, 0.177858, 0, 1, 0, -0.177858, 0, -0.984056, -32.6188, -0.20292, -1.29162)
+transform = Transform3D(-0.984056, 0, 0.177858, 0, 1, 0, -0.177858, 0, -0.984056, -33.4038, -0.20292, -6.82988)
 
 [node name="Rock_23" parent="Ground/flat-trees-rocks-2/flat-trees-rocks-2/flat-trees-rocks-2/MapleTree_12/wall-trees-rocks/MapleTree_33/NormalTree_52/Rock_52" instance=ExtResource("4_o7y3g")]
 transform = Transform3D(-0.984056, 0, 0.177858, 0, 1, 0, -0.177858, 0, -0.984056, -28.8124, -0.20292, -3.21669)
@@ -3081,7 +2477,7 @@ transform = Transform3D(-0.984056, 0, 0.177858, 0, 1, 0, -0.177858, 0, -0.984056
 transform = Transform3D(-0.984056, 0, 0.177858, 0, 1, 0, -0.177858, 0, -0.984056, -34.8567, -0.20292, -3.45548)
 
 [node name="Rock_53" parent="Ground/flat-trees-rocks-2/flat-trees-rocks-2/flat-trees-rocks-2/MapleTree_12/wall-trees-rocks/MapleTree_33/NormalTree_52/Rock_52" instance=ExtResource("13_vqcon")]
-transform = Transform3D(-0.984056, 0, 0.177858, 0, 1, 0, -0.177858, 0, -0.984056, -30.7415, -0.20292, -2.38205)
+transform = Transform3D(-0.984056, 0, 0.177858, 0, 1, 0, -0.177858, 0, -0.984056, -30.5159, -0.20292, -4.76799)
 
 [node name="Rock_12" parent="Ground/flat-trees-rocks-2/flat-trees-rocks-2/flat-trees-rocks-2/MapleTree_12/wall-trees-rocks/MapleTree_33/NormalTree_52/Rock_52/Rock_53" instance=ExtResource("2_dn385")]
 transform = Transform3D(-0.951723, 0, -0.306958, 0, 1, 0, 0.306958, 0, -0.951723, -0.302605, 0.25, 1.56814)
@@ -3090,7 +2486,7 @@ transform = Transform3D(-0.951723, 0, -0.306958, 0, 1, 0, 0.306958, 0, -0.951723
 transform = Transform3D(-0.951723, 0, -0.306958, 0, 1, 0, 0.306958, 0, -0.951723, 2.27739, 0.25, -1.38481)
 
 [node name="Rock_32" parent="Ground/flat-trees-rocks-2/flat-trees-rocks-2/flat-trees-rocks-2/MapleTree_12/wall-trees-rocks/MapleTree_33/NormalTree_52/Rock_52/Rock_53" instance=ExtResource("11_k8d88")]
-transform = Transform3D(-0.951723, 0, -0.306958, 0, 1, 0, 0.306958, 0, -0.951723, -1.20104, 0.25, -0.636142)
+transform = Transform3D(-0.951723, 0, -0.306958, 0, 1, 0, 0.306958, 0, -0.951723, -0.918839, 0.25, 2.69411)
 
 [node name="Rock_42" parent="Ground/flat-trees-rocks-2/flat-trees-rocks-2/flat-trees-rocks-2/MapleTree_12/wall-trees-rocks/MapleTree_33/NormalTree_52/Rock_52/Rock_53" instance=ExtResource("12_kyfdu")]
 transform = Transform3D(-0.951723, 0, -0.306958, 0, 1, 0, 0.306958, 0, -0.951723, -3.16591, 0.25, 1.25344)
@@ -4085,12 +3481,12 @@ transform = Transform3D(1.00155, 0, 1.32349e-23, 0, 1.00155, 0, 0, 0, 1.00155, 2
 [node name="Lanes" type="Node3D" parent="."]
 
 [node name="LeftLane" type="MeshInstance3D" parent="Lanes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -0.295, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, -0.295, 0.011)
 mesh = SubResource("BoxMesh_lane")
 surface_material_override/0 = SubResource("StandardMaterial3D_lane")
 
 [node name="RightLane" type="MeshInstance3D" parent="Lanes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, -0.295, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, -0.295, 0.011)
 mesh = SubResource("BoxMesh_lane")
 surface_material_override/0 = SubResource("StandardMaterial3D_lane")
 
@@ -5056,9 +4452,11 @@ camera_height = 7.5
 camera_angle = 22.0
 metadata/_edit_lock_ = true
 
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.303974, -0.779178, -0.548161, -0.433013, -0.399519, 0.808013, -0.848587, 0.482976, -0.215951, 47.2283, 45, -24.2203)
+
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 30, 0)
-shadow_enabled = true
 
 [node name="Walls2" type="Node3D" parent="."]
 transform = Transform3D(1.06745, 0, 0, 0, 1, 0, 0, 0, 1.03369, 0, 0, 0)
@@ -5125,94 +4523,336 @@ surface_material_override/0 = SubResource("StandardMaterial3D_wall")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Walls2/TopRightWall"]
 shape = SubResource("BoxShape3D_wall_segment")
 
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_22"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_23"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_24"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_14"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_14/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_16"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_17"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_18"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_12/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_22"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_23"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_24"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_14"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_14/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_16"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_17"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_18"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/Rock_13/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_22"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_23"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_24"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_14"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_14/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_16"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_17"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_18"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_12/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_22"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_23"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_24"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_14"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_14/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_16"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_17"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_18"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/Rock_13/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_22"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_23"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_24"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_16"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_17"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_18"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_22"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_23"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_24"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_16"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_17"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_18"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_22"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_23"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_24"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_14/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_16"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_17"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_18"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_12/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_22"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_23"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_24"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_14/Rock_15"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_16"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_17"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_18"]
-[editable path="Ground/wall-trees-rocks/NormalTree_35/RigidBody3D/RigidBody3D/RigidBody3D/RigidBody3D/Rock_13/Rock_13"]
+[node name="sample" parent="." instance=ExtResource("28_ypwn2")]
+transform = Transform3D(-4.37114e-07, 0, 10, 0, 10, 0, -10, 0, -4.37114e-07, 15, 5, 35)
+
+[node name="sample2" parent="." instance=ExtResource("28_ypwn2")]
+transform = Transform3D(-4.37114e-07, 0, 10, 0, 10, 0, -10, 0, -4.37114e-07, -15, 5, 35)
+
+[node name="sample3" parent="." instance=ExtResource("28_ypwn2")]
+transform = Transform3D(-4.37114e-07, 0, -10, 0, 10, 0, 10, 0, -4.37114e-07, 15, 5, -35)
+
+[node name="sample4" parent="." instance=ExtResource("28_ypwn2")]
+transform = Transform3D(-4.37114e-07, 0, -10, 0, 10, 0, 10, 0, -4.37114e-07, -15, 5, -35)
+
+[node name="fence" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, 1.05697e-06, 0, 7, 0, -1.05697e-06, 0, -7, -18.7846, 1.53629, -50.194)
+
+[node name="fence2" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, 1.05697e-06, 0, 7, 0, -1.05697e-06, 0, -7, -21.3972, 1.53629, -50.194)
+
+[node name="fence3" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, 1.05697e-06, 0, 7, 0, -1.05697e-06, 0, -7, -23.9925, 1.53629, -50.194)
+
+[node name="fence4" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, 1.05697e-06, 0, 7, 0, -1.05697e-06, 0, -7, -10.3969, 1.53629, -50.194)
+
+[node name="fence5" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, 1.05697e-06, 0, 7, 0, -1.05697e-06, 0, -7, -13.0328, 1.53629, -50.194)
+
+[node name="fence6" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, 1.05697e-06, 0, 7, 0, -1.05697e-06, 0, -7, -16.1698, 1.53629, -50.194)
+
+[node name="fence7" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, 1.05697e-06, 0, 7, 0, -1.05697e-06, 0, -7, -28.6585, 1.53629, -50.194)
+
+[node name="fence8" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.0458, 1.53629, -48.9608)
+
+[node name="fence9" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -46.3089)
+
+[node name="fence10" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -32.3647)
+
+[node name="fence11" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-2.54317e-07, -2.75759, -6.43395, -1.20538e-07, 6.43395, -2.75759, 7, 1.06048e-08, -2.81237e-07, -30.3138, 1.53611, -21.7086)
+
+[node name="fence12" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -35.1998)
+
+[node name="fence13" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(0.576734, -1.35269, -6.8438, 0.11359, 6.86806, -1.34791, 6.97528, -6.51926e-08, 0.587814, -30.2327, 1.53611, -19.119)
+
+[node name="fence14" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -24.4273)
+
+[node name="fence15" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -40.9843)
+
+[node name="fence16" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -29.6995)
+
+[node name="fence17" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -37.8204)
+
+[node name="fence18" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -27.0791)
+
+[node name="fence19" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -43.6666)
+
+[node name="fence20" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -16.4861)
+
+[node name="fence21" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -13.8723)
+
+[node name="fence22" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -11.263)
+
+[node name="fence23" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -8.66389)
+
+[node name="fence24" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -6.04319)
+
+[node name="fence25" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -3.43854)
+
+[node name="fence26" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, -0.839507)
+
+[node name="fence27" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 1.76806)
+
+[node name="fence28" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 4.38185)
+
+[node name="fence29" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 6.98346)
+
+[node name="fence30" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 9.60569)
+
+[node name="fence31" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 40.8681)
+
+[node name="fence32" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 12.1679)
+
+[node name="fence33" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 14.7817)
+
+[node name="fence34" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 17.391)
+
+[node name="fence35" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 19.9901)
+
+[node name="fence36" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 22.6108)
+
+[node name="fence37" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 25.2155)
+
+[node name="fence38" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 27.8145)
+
+[node name="fence39" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 30.4221)
+
+[node name="fence40" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 33.0359)
+
+[node name="fence41" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 35.6375)
+
+[node name="fence42" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 38.2597)
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="fence42"]
+transform = Transform3D(0.625, -0.779007, -0.0502406, -0.433013, -0.399519, 0.808013, -0.649519, -0.483253, -0.587019, 47.2283, 45, -401.288)
+shadow_enabled = true
+
+[node name="fence43" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 43.4934)
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="fence43"]
+transform = Transform3D(0.625, -0.779007, -0.0502406, -0.433013, -0.399519, 0.808013, -0.649519, -0.483253, -0.587019, 47.2283, 45, -401.288)
+shadow_enabled = true
+
+[node name="fence44" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, -11.2602, 1.53611, 50.193)
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="fence44"]
+transform = Transform3D(0.625, -0.779007, -0.0502406, -0.433013, -0.399519, 0.808013, -0.649519, -0.483253, -0.587019, 47.2283, 45, -401.288)
+shadow_enabled = true
+
+[node name="fence45" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -30.042, 1.53611, 46.1149)
+
+[node name="fence46" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, -13.8681, 1.53611, 50.193)
+
+[node name="fence47" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, -16.6369, 1.53611, 50.193)
+
+[node name="fence48" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, -19.2394, 1.53611, 50.193)
+
+[node name="fence49" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, -21.8471, 1.53611, 50.193)
+
+[node name="fence50" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, -24.4643, 1.53611, 50.193)
+
+[node name="fence51" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, -27.0676, 1.53611, 50.193)
+
+[node name="fence52" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0.00183186, 0, 7, 0, -0.00183186, 0, 7, 18.7611, 1.53629, 48.7291)
+
+[node name="fence53" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0.00183186, 0, 7, 0, -0.00183186, 0, 7, 21.3737, 1.53629, 48.7284)
+
+[node name="fence54" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0.00183186, 0, 7, 0, -0.00183186, 0, 7, 23.969, 1.53629, 48.7277)
+
+[node name="fence55" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0.00183186, 0, 7, 0, -0.00183186, 0, 7, 10.3734, 1.53629, 48.7313)
+
+[node name="fence56" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0.00183186, 0, 7, 0, -0.00183186, 0, 7, 13.0093, 1.53629, 48.7306)
+
+[node name="fence57" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0.00183186, 0, 7, 0, -0.00183186, 0, 7, 16.1463, 1.53629, 48.7298)
+
+[node name="fence58" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(7, 0, 0.00183186, 0, 7, 0, -0.00183186, 0, 7, 28.635, 1.53629, 48.7265)
+
+[node name="fence59" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0219, 1.53629, 47.4929)
+
+[node name="fence60" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0175, 1.53611, 44.841)
+
+[node name="fence61" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0138, 1.53611, 30.8969)
+
+[node name="fence62" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183284, 2.75759, 6.43395, -1.08311e-07, 6.43395, -2.75759, -7, -0.000722131, -0.00168458, 30.2829, 1.53611, 20.2406)
+
+[node name="fence63" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0146, 1.53611, 33.7319)
+
+[node name="fence64" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.578561, 1.35269, 6.84365, 0.11359, 6.86806, -1.34791, -6.97512, -0.0003541, -0.589606, 30.2011, 1.53611, 17.6511)
+
+[node name="fence65" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0118, 1.53611, 22.9594)
+
+[node name="fence66" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0161, 1.53611, 39.5164)
+
+[node name="fence67" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0131, 1.53611, 28.2317)
+
+[node name="fence68" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0153, 1.53611, 36.3526)
+
+[node name="fence69" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0124, 1.53611, 25.6112)
+
+[node name="fence70" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0168, 1.53611, 42.1987)
+
+[node name="fence71" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0097, 1.53611, 15.0182)
+
+[node name="fence72" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.009, 1.53611, 12.4045)
+
+[node name="fence73" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0083, 1.53611, 9.7952)
+
+[node name="fence74" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0076, 1.53611, 7.19604)
+
+[node name="fence75" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0069, 1.53611, 4.57534)
+
+[node name="fence76" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0063, 1.53611, 1.97068)
+
+[node name="fence77" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0056, 1.53611, -0.628346)
+
+[node name="fence78" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0049, 1.53611, -3.23592)
+
+[node name="fence79" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0042, 1.53611, -5.84971)
+
+[node name="fence80" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0035, 1.53611, -8.45131)
+
+[node name="fence81" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0028, 1.53611, -11.0735)
+
+[node name="fence82" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.9947, 1.53611, -42.336)
+
+[node name="fence83" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0022, 1.53611, -13.6358)
+
+[node name="fence84" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0015, 1.53611, -16.2495)
+
+[node name="fence85" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0008, 1.53611, -18.8588)
+
+[node name="fence86" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 30.0001, 1.53611, -21.458)
+
+[node name="fence87" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.9994, 1.53611, -24.0787)
+
+[node name="fence88" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.9988, 1.53611, -26.6833)
+
+[node name="fence89" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.9981, 1.53611, -29.2824)
+
+[node name="fence90" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.9974, 1.53611, -31.8899)
+
+[node name="fence91" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.9967, 1.53611, -34.5037)
+
+[node name="fence92" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.996, 1.53611, -37.1053)
+
+[node name="fence93" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.9953, 1.53611, -39.7276)
+
+[node name="fence94" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.994, 1.53611, -44.9612)
+
+[node name="fence95" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, -0.00183187, 0, 7, 0, 0.00183187, 0, -7, 12.7179, 1.53611, -50.2967)
+
+[node name="fence96" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-0.00183279, 0, 7, 0, 7, 0, -7, 0, -0.00183279, 29.9933, 1.53611, -47.5828)
+
+[node name="fence97" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, -0.00183187, 0, 7, 0, 0.00183187, 0, -7, 15.3258, 1.53611, -50.2975)
+
+[node name="fence98" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, -0.00183187, 0, 7, 0, 0.00183187, 0, -7, 18.0946, 1.53611, -50.2982)
+
+[node name="fence99" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, -0.00183187, 0, 7, 0, 0.00183187, 0, -7, 20.6971, 1.53611, -50.2989)
+
+[node name="fence100" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, -0.00183187, 0, 7, 0, 0.00183187, 0, -7, 23.3047, 1.53611, -50.2995)
+
+[node name="fence101" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, -0.00183187, 0, 7, 0, 0.00183187, 0, -7, 25.922, 1.53611, -50.3002)
+
+[node name="fence102" parent="." instance=ExtResource("29_cll5n")]
+transform = Transform3D(-7, 0, -0.00183187, 0, 7, 0, 0.00183187, 0, -7, 28.5253, 1.53611, -50.3009)
+
 [editable path="Bases/PlayerBase/stone-base"]
 [editable path="Obstacles/RigidBody3D/Rock_12"]
 [editable path="Obstacles/RigidBody3D/Rock_12/Rock_22"]

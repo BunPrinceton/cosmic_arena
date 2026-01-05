@@ -6,7 +6,7 @@ class_name EnergySystem
 signal energy_changed(current: float, maximum: float)
 
 @export var max_energy: float = 10.0
-@export var energy_regen_rate: float = 1.0  # Energy per second
+@export var energy_regen_rate: float = 0.333  # Energy per second (1 energy every 3 seconds)
 @export var starting_energy: float = 5.0
 
 var current_energy: float = 0.0

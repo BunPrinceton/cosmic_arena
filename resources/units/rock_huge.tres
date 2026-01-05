@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unit_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+unit_name = "Huge Rock"
+description = "A massive boulder. Expensive but dominates the field."
+visual_color = Color(0.65, 0.6, 0.55, 1)
+max_health = 400.0
+move_speed = 0.0
+attack_damage = 0.0
+attack_range = 0.0
+attack_cooldown = 0.0
+vision_range = 0.0
+energy_cost = 6.5
+visual_size = Vector2(80, 80)
+grid_size = Vector2i(3, 3)
+model_scene_path = "res://assets/models/environment/rocks/Rock_4.glb"
+is_ranged = false
+is_support = false
+heal_amount = 0.0
+heal_range = 0.0

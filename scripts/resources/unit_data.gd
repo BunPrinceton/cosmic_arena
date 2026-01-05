@@ -20,6 +20,10 @@ class_name UnitData
 @export_group("Deployment")
 @export var energy_cost: float = 2.0
 @export var visual_size: Vector2 = Vector2(20, 20)
+## Grid cells this unit occupies (e.g., Vector2i(2,2) = 2x2 grid)
+@export var grid_size: Vector2i = Vector2i(1, 1)
+## 3D model scene to spawn (path to .glb or .tscn)
+@export var model_scene_path: String = ""
 
 @export_group("Special Properties")
 @export var is_ranged: bool = false

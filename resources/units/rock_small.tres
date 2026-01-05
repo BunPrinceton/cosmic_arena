@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unit_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+unit_name = "Small Rock"
+description = "A small boulder. Cheap and quick to deploy."
+visual_color = Color(0.5, 0.45, 0.4, 1)
+max_health = 50.0
+move_speed = 0.0
+attack_damage = 0.0
+attack_range = 0.0
+attack_cooldown = 0.0
+vision_range = 0.0
+energy_cost = 1.0
+visual_size = Vector2(20, 20)
+grid_size = Vector2i(1, 1)
+model_scene_path = "res://assets/models/environment/rocks/Rock_1.glb"
+is_ranged = false
+is_support = false
+heal_amount = 0.0
+heal_range = 0.0
