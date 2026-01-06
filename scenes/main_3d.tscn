@@ -4104,16 +4104,16 @@ surface_material_override/0 = SubResource("StandardMaterial3D_wall")
 shape = SubResource("BoxShape3D_wall_segment")
 
 [node name="tower-p-right" parent="." instance=ExtResource("28_ypwn2")]
-transform = Transform3D(-4.37114e-07, 0, 10, 0, 10, 0, -10, 0, -4.37114e-07, 15, 5, 25)
+transform = Transform3D(-3.0598e-07, 0, 7, 0, 7, 0, -7, 0, -3.0598e-07, 15, 3.40965, 25)
 
 [node name="tower-p-left" parent="." instance=ExtResource("28_ypwn2")]
-transform = Transform3D(-4.37114e-07, 0, 10, 0, 10, 0, -10, 0, -4.37114e-07, -15, 5, 25)
+transform = Transform3D(-3.0598e-07, 0, 7, 0, 7, 0, -7, 0, -3.0598e-07, -15, 3.40965, 25)
 
 [node name="tower-e-right" parent="." instance=ExtResource("28_ypwn2")]
-transform = Transform3D(-4.37114e-07, 0, -10, 0, 10, 0, 10, 0, -4.37114e-07, 15, 5, -25)
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, 15, 3.40965, -25)
 
 [node name="tower-e-left" parent="." instance=ExtResource("28_ypwn2")]
-transform = Transform3D(-4.37114e-07, 0, -10, 0, 10, 0, 10, 0, -4.37114e-07, -15, 5, -25)
+transform = Transform3D(-3.0598e-07, 0, -7, 0, 7, 0, 7, 0, -3.0598e-07, -15, 3.40965, -25)
 
 [node name="fence" parent="." instance=ExtResource("29_cll5n")]
 transform = Transform3D(-7, 0, 1.05697e-06, 0, 7, 0, -1.05697e-06, 0, -7, -18.7846, 1.53629, -50.194)

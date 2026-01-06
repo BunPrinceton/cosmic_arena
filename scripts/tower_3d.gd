@@ -18,7 +18,7 @@ signal tower_destroyed(tower: Tower3D)
 # Combat
 @export var attack_damage: float = 60.0  # One-shots swarm pebbles (50 HP)
 @export var attack_range: float = 18.0  # Range to detect and attack enemies (less than artillery's 20.0)
-@export var attack_cooldown: float = 1.5  # Time between attacks
+@export var attack_cooldown: float = 2.5  # Time between attacks
 @export var projectile_speed: float = 12.0  # Speed of rock projectiles
 @export var projectile_model_path: String = "res://assets/models/environment/rocks/Rock_1.glb"
 

@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://dv6qi8hacy1mv"]
+
+[ext_resource type="Texture2D" uid="uid://dcjsice1acqtl" path="res://assets/models/screenshot_2026-01-04_181122.png" id="1_fgxkp"]
+
+[resource]
+albedo_color = Color(0.55, 0.4, 0.25, 1)
+albedo_texture = ExtResource("1_fgxkp")
+uv1_scale = Vector3(0.5, 2, 1)
+texture_filter = 0
+proximity_fade_distance = 23.2

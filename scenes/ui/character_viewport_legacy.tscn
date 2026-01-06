@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3 uid="uid://dg8kvm2nqh3pt"]
+
+[ext_resource type="Script" path="res://scripts/ui/character_viewport.gd" id="1_viewport"]
+
+[node name="CharacterViewport" type="SubViewport"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(500, 600)
+render_target_update_mode = 4
+script = ExtResource("1_viewport")
+
+[node name="CharacterSlot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 1.0, 5.0)
+fov = 40.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.25, -0.433013, 0, 0.866025, 0.5, 0.5, -0.433013, 0.75, 2, 3, 2)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="FillLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, -2, 2, 1)
+light_color = Color(0.8, 0.85, 1, 1)
+light_energy = 0.4
