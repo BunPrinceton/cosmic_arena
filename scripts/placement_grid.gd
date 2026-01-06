@@ -8,28 +8,40 @@ class_name PlacementGrid
 const CELL_SIZE: float = 2.0  # Size of each grid cell in world units
 const GRID_HEIGHT: float = 0.05  # Height above ground
 
-# Grid bounds (matches 60x100 battlefield)
-var grid_min: Vector3 = Vector3(-30, 0, -50)
-var grid_max: Vector3 = Vector3(30, 0, 50)
+# Grid bounds (matches fenced arena area - fences at approximately X=-23 to X=23)
+var grid_min: Vector3 = Vector3(-22, 0, -50)
+var grid_max: Vector3 = Vector3(22, 0, 50)
 
-# Playable zone (player's half of the field for now)
-var playable_z_min: float = 0.0  # Player can only place on their half
+# Dynamic placement zones based on tower destruction
+# Tier 0: Initial - player's half (Z: 0 to 50) - unchanged from original
+# Tier 1: One enemy tower destroyed - past midfield (Z: -15 to 50)
+# Tier 2: Both enemy towers destroyed - near enemy base (Z: -35 to 50)
+const ZONE_TIERS: Array[float] = [0.0, -15.0, -35.0]  # playable_z_min for each tier
+var current_zone_tier: int = 0
+
+# Playable zone (dynamically updated based on tower destruction)
+var playable_z_min: float = 0.0  # Start at midfield (original behavior)
 var playable_z_max: float = 50.0
 
+signal zone_expanded(new_tier: int, new_z_min: float)
+
 # Colors
-const COLOR_PLACEABLE: Color = Color(0.2, 0.5, 0.9, 0.3)  # Light blue
+const COLOR_PLACEABLE: Color = Color(0.2, 0.5, 0.9, 0.3)  # Light blue (base zone)
+const COLOR_EXPANDED: Color = Color(0.2, 0.8, 0.6, 0.35)  # Teal/cyan (newly unlocked zone)
 const COLOR_BLOCKED: Color = Color(0.9, 0.2, 0.2, 0.4)  # Red
 const COLOR_UNIT_VALID: Color = Color(0.2, 0.9, 0.3, 0.5)  # Bright green
 const COLOR_UNIT_INVALID: Color = Color(0.9, 0.2, 0.2, 0.6)  # Brighter red
 
 # Grid line materials
 var placeable_material: StandardMaterial3D
+var expanded_material: StandardMaterial3D
 var blocked_material: StandardMaterial3D
 var unit_valid_material: StandardMaterial3D
 var unit_invalid_material: StandardMaterial3D
 
 # Grid meshes
 var grid_lines_mesh: MeshInstance3D
+var expanded_zone_mesh: MeshInstance3D  # Shows newly unlocked areas
 var blocked_cells_mesh: MeshInstance3D
 var unit_footprint_mesh: MeshInstance3D
 
@@ -51,6 +63,12 @@ func _create_materials() -> void:
 	placeable_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	placeable_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	placeable_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	expanded_material = StandardMaterial3D.new()
+	expanded_material.albedo_color = COLOR_EXPANDED
+	expanded_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	expanded_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	expanded_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 
 	blocked_material = StandardMaterial3D.new()
 	blocked_material.albedo_color = COLOR_BLOCKED
@@ -76,6 +94,11 @@ func _create_grid_meshes() -> void:
 	grid_lines_mesh.material_override = placeable_material
 	add_child(grid_lines_mesh)
 
+	# Expanded zone mesh (teal quads for newly unlocked areas)
+	expanded_zone_mesh = MeshInstance3D.new()
+	expanded_zone_mesh.material_override = expanded_material
+	add_child(expanded_zone_mesh)
+
 	# Blocked cells mesh (red quads for non-placeable area)
 	blocked_cells_mesh = MeshInstance3D.new()
 	blocked_cells_mesh.material_override = blocked_material
@@ -95,6 +118,7 @@ func show_grid(unit_grid_size: Vector2i = Vector2i(1, 1)) -> void:
 	blocked_positions.clear()
 
 	_rebuild_grid_mesh()
+	_rebuild_expanded_zone_mesh()
 	_rebuild_blocked_mesh()
 
 func hide_grid() -> void:
@@ -133,14 +157,30 @@ func _rebuild_grid_mesh() -> void:
 
 	grid_lines_mesh.mesh = st.commit()
 
+func _rebuild_expanded_zone_mesh() -> void:
+	var st = SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+
+	var y = GRID_HEIGHT + 0.005
+
+	# Show expanded zone (from initial tier boundary to current boundary)
+	# Tier 0 starts at Z=25, so anything below that is "expanded territory"
+	var initial_z = ZONE_TIERS[0]  # 25.0
+
+	if current_zone_tier > 0 and playable_z_min < initial_z:
+		# Draw teal quad from playable_z_min to the initial boundary
+		_add_quad(st, grid_min.x, grid_max.x, playable_z_min, initial_z, y)
+
+	expanded_zone_mesh.mesh = st.commit()
+
 func _rebuild_blocked_mesh() -> void:
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 	var y = GRID_HEIGHT + 0.01
 
-	# Enemy half of field is blocked
-	_add_quad(st, grid_min.x, grid_max.x, grid_min.z, 0.0, y)
+	# Block everything before current playable zone (dynamically changes)
+	_add_quad(st, grid_min.x, grid_max.x, grid_min.z, playable_z_min, y)
 
 	# Add static blocked cells (obstacles)
 	for cell in static_blocked_positions:
@@ -271,3 +311,29 @@ func clear_static_blocked_cells() -> void:
 	static_blocked_positions.clear()
 	if is_visible:
 		_rebuild_blocked_mesh()
+
+## Set the placement zone tier (0 = initial, 1 = one tower down, 2 = both towers down)
+func set_zone_tier(tier: int) -> void:
+	tier = clamp(tier, 0, ZONE_TIERS.size() - 1)
+	if tier == current_zone_tier:
+		return
+
+	current_zone_tier = tier
+	playable_z_min = ZONE_TIERS[tier]
+
+	print("Placement zone expanded! Tier %d - Can now place units from Z=%.0f" % [tier, playable_z_min])
+	zone_expanded.emit(tier, playable_z_min)
+
+	# Rebuild grid if visible
+	if is_visible:
+		_rebuild_grid_mesh()
+		_rebuild_expanded_zone_mesh()
+		_rebuild_blocked_mesh()
+
+## Get the current zone tier
+func get_zone_tier() -> int:
+	return current_zone_tier
+
+## Expand zone by one tier (convenience method)
+func expand_zone() -> void:
+	set_zone_tier(current_zone_tier + 1)

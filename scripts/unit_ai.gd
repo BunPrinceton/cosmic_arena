@@ -36,6 +36,9 @@ var current_lane: Lane = Lane.LEFT
 var current_target: Node3D = null
 var spawn_position: Vector3 = Vector3.ZERO
 
+# Target locking - once attacking, stay committed until target dies
+var locked_target: Node3D = null  # The target we're committed to attacking
+
 # Obstacle avoidance - reactive (when stuck)
 var stuck_timer: float = 0.0
 var last_position: Vector3 = Vector3.ZERO
@@ -58,15 +61,22 @@ const PREDICTIVE_LOOK_AHEAD: float = 1.0  # Seconds to predict ally positions
 const ATTACK_SPREAD_RANGE: float = 4.0  # Distance to spread around target when attacking
 const ATTACK_SPREAD_STRENGTH: float = 0.4  # How strongly to spread around target
 
+# Friendly tower avoidance - steer around allied towers
+const FRIENDLY_TOWER_AVOIDANCE_RANGE: float = 8.0  # Range to start avoiding friendly towers
+const FRIENDLY_TOWER_AVOIDANCE_STRENGTH: float = 0.8  # How strongly to steer around
+
 # Cached ally data for flocking
 var nearby_allies: Array[Node3D] = []
 var last_velocity: Vector3 = Vector3.ZERO
 var current_velocity: Vector3 = Vector3.ZERO
 
 # Lane positions
-const LEFT_LANE_X: float = -15.0
-const RIGHT_LANE_X: float = 15.0
-const LANE_WIDTH: float = 8.0
+const LEFT_LANE_X: float = -20.0
+const RIGHT_LANE_X: float = 20.0
+const LANE_WIDTH: float = 15.0  # Width to consider "in lane"
+
+# Track if first tower in lane was destroyed - allows moving to next objective
+var first_tower_destroyed: bool = false
 
 # Base positions
 const PLAYER_BASE_Z: float = 50.0
@@ -77,6 +87,10 @@ var enemy_base: Node3D = null
 var player_base: Node3D = null
 var towers: Array[Node3D] = []
 var parent_unit: Node3D = null
+
+# Assigned tower - set by game controller for deterministic targeting
+var assigned_tower: Node3D = null  # The specific tower this unit must destroy
+var assigned_lane: int = -1  # The lane this unit is assigned to
 
 func _ready() -> void:
 	spawn_position = global_position
@@ -97,8 +111,15 @@ func set_bases(p_player_base: Node3D, p_enemy_base: Node3D) -> void:
 func set_towers(p_towers: Array[Node3D]) -> void:
 	towers = p_towers
 
+func set_assigned_tower(tower: Node3D, lane: int) -> void:
+	# Assign a specific blocking tower - this unit MUST destroy it before proceeding
+	assigned_tower = tower
+	assigned_lane = lane
+	if tower:
+		print("Unit assigned to lane %d, blocking tower: %s" % [lane, tower.name])
+
 func _determine_lane() -> void:
-	# Determine lane based on spawn X position
+	# Determine lane based on spawn X position (LEFT or RIGHT)
 	if spawn_position.x < 0:
 		current_lane = Lane.LEFT
 	else:
@@ -128,15 +149,38 @@ func _physics_process(delta: float) -> void:
 			_process_responding(delta)
 
 func _process_advancing(delta: float) -> void:
-	# Check for targets in range
+	# Check if we have a locked target that's still valid - stay committed
+	if locked_target and is_instance_valid(locked_target):
+		if locked_target.has_method("is_alive") and locked_target.is_alive():
+			# Locked target is still alive - move toward it and attack when in range
+			current_target = locked_target
+			if _is_in_attack_range(locked_target):
+				current_state = AIState.ATTACKING
+				return
+			# Move toward locked target
+			var direction = _calculate_movement_direction(locked_target.global_position)
+			_move(direction, delta)
+			return
+		else:
+			# Locked target died - clear it
+			locked_target = null
+
+	# Find priority target (tower, enemy, or base)
 	var new_target = _find_priority_target()
-	if new_target and _is_in_attack_range(new_target):
+
+	# ALWAYS set current_target so _get_objective_position knows where to go
+	# This fixes the bug where units would run past towers to the base
+	if new_target:
 		current_target = new_target
+
+	# Check if we're in attack range - switch to attacking state and lock target
+	if new_target and _is_in_attack_range(new_target):
+		locked_target = new_target  # Lock onto this target
 		current_state = AIState.ATTACKING
 		target_acquired.emit(current_target)
 		return
 
-	# Move toward objective
+	# Move toward objective (current_target or base if no target)
 	var objective_pos = _get_objective_position()
 	if objective_pos == Vector3.ZERO:
 		return
@@ -147,39 +191,49 @@ func _process_advancing(delta: float) -> void:
 	# Apply movement
 	_move(direction, delta)
 
-	# Check if arrived at objective
-	var distance_to_objective = global_position.distance_to(objective_pos)
-	if distance_to_objective < attack_range:
+	# Check if arrived at objective (use horizontal distance - Y shouldn't matter)
+	var horizontal_dist = Vector2(global_position.x - objective_pos.x, global_position.z - objective_pos.z).length()
+	if horizontal_dist < attack_range:
 		if current_target:
+			locked_target = current_target  # Lock onto this target
 			current_state = AIState.ATTACKING
 			arrived_at_target.emit()
 
 func _process_attacking(delta: float) -> void:
-	if not is_instance_valid(current_target):
-		# Target destroyed, find new one
+	# Use locked target if available, fall back to current_target
+	var attack_target = locked_target if locked_target else current_target
+
+	if not is_instance_valid(attack_target):
+		# Target destroyed, clear lock and find new one
+		locked_target = null
 		current_target = null
 		current_state = AIState.ADVANCING
 		target_lost.emit()
 		return
 
 	# Check if target is still alive (towers/bases have is_alive method)
-	if current_target.has_method("is_alive") and not current_target.is_alive():
-		# Target died, find new one
+	if attack_target.has_method("is_alive") and not attack_target.is_alive():
+		# Target died, clear lock and find new one
+		locked_target = null
 		current_target = null
 		current_state = AIState.ADVANCING
 		target_lost.emit()
 		return
 
+	# Ensure current_target matches locked_target
+	current_target = attack_target
+
 	# Check if still in range
-	if not _is_in_attack_range(current_target):
+	if not _is_in_attack_range(attack_target):
 		# Move closer - use full movement calculation for flocking
-		var direction = _calculate_movement_direction(current_target.global_position)
+		var direction = _calculate_movement_direction(attack_target.global_position)
 		_move(direction, delta)
 	else:
 		# In range - still apply slight separation/spread while attacking
 		var separation = _calculate_separation_force()
 		var spread = _calculate_attack_spread()
-		var nudge = (separation + spread).limit_length(0.3)
+		var tower_avoid = _calculate_friendly_tower_avoidance()
+		var nudge = (separation + spread + tower_avoid).limit_length(0.4)
 		if nudge.length() > 0.1:
 			# Gentle repositioning while attacking
 			_move(nudge.normalized(), delta * 0.5)
@@ -187,6 +241,7 @@ func _process_attacking(delta: float) -> void:
 func _process_responding(delta: float) -> void:
 	if not is_instance_valid(current_target):
 		# Threat eliminated, resume advancing
+		locked_target = null
 		current_target = null
 		current_state = AIState.ADVANCING
 		target_lost.emit()
@@ -194,6 +249,7 @@ func _process_responding(delta: float) -> void:
 
 	# Check if target is still alive
 	if current_target.has_method("is_alive") and not current_target.is_alive():
+		locked_target = null
 		current_target = null
 		current_state = AIState.ADVANCING
 		target_lost.emit()
@@ -203,28 +259,51 @@ func _process_responding(delta: float) -> void:
 	var direction = _calculate_movement_direction(current_target.global_position)
 	_move(direction, delta)
 
-	# If in range, start attacking
+	# If in range, start attacking and lock onto target
 	if _is_in_attack_range(current_target):
+		locked_target = current_target  # Lock onto this target
 		current_state = AIState.ATTACKING
 
 func _find_priority_target() -> Node3D:
-	# Priority: 1. Enemy units in vision, 2. Towers, 3. Enemy base
+	# Priority:
+	# 1. BLOCKING TOWER - must be destroyed before anything else (except immediate threats)
+	# 2. Enemy units that are CLOSE (within engagement range) - immediate threats
+	# 3. Enemy units in vision (if no blocking tower)
+	# 4. Enemy base (ONLY if no blocking tower exists)
 
-	# Check for enemy units in vision range
 	var enemy_unit = _find_nearest_enemy_unit()
-	if enemy_unit and global_position.distance_to(enemy_unit.global_position) <= vision_range:
+	var enemy_dist = INF
+	if enemy_unit:
+		# Use horizontal distance for consistency
+		var my_pos = global_position
+		var enemy_pos = enemy_unit.global_position
+		enemy_dist = Vector2(my_pos.x - enemy_pos.x, my_pos.z - enemy_pos.z).length()
+
+	# Check for blocking tower - this is the PRIMARY waypoint objective
+	var blocking_tower = _find_lane_tower()
+
+	# If there's an enemy very close (within engagement range), fight them first
+	# But only if they're REALLY close (immediate threat)
+	var engagement_range = attack_range * 1.5
+	if enemy_unit and enemy_dist <= engagement_range:
 		return enemy_unit
 
-	# Check for towers in our lane (only if alive)
-	var lane_tower = _find_lane_tower()
-	if lane_tower:
-		return lane_tower
+	# BLOCKING TOWER takes priority - unit CANNOT pass until tower is destroyed
+	if blocking_tower:
+		return blocking_tower
 
-	# Default to enemy base (if alive)
+	# No blocking tower - check for enemy units in vision range
+	if enemy_unit and enemy_dist <= vision_range:
+		return enemy_unit
+
+	# No blocking tower and no enemies - can target enemy base
 	var target_base: Node3D = enemy_base if team == 0 else player_base
 	if target_base and is_instance_valid(target_base):
 		if target_base.has_method("is_alive") and not target_base.is_alive():
 			return null  # Base destroyed, no target
+		# Debug: warn if going to base without assigned tower (shouldn't happen)
+		if assigned_tower == null and assigned_lane >= 0:
+			print("WARNING: Unit going to base but was assigned lane %d with no tower!" % assigned_lane)
 		return target_base
 
 	return null
@@ -243,7 +322,10 @@ func _find_nearest_enemy_unit() -> Node3D:
 		if unit == parent_unit:
 			continue
 		if unit.has_method("get_team") and unit.get_team() != team:
-			var dist = global_position.distance_to(unit.global_position)
+			# Use horizontal distance for consistency
+			var my_pos = global_position
+			var unit_pos = unit.global_position
+			var dist = Vector2(my_pos.x - unit_pos.x, my_pos.z - unit_pos.z).length()
 			if dist < nearest_dist:
 				nearest_dist = dist
 				nearest = unit
@@ -251,24 +333,56 @@ func _find_nearest_enemy_unit() -> Node3D:
 	return nearest
 
 func _find_lane_tower() -> Node3D:
-	# Find tower in our lane that's still alive
+	# Use the assigned tower if set (deterministic targeting from game controller)
+	if assigned_tower and is_instance_valid(assigned_tower):
+		# Check if assigned tower is still alive
+		if assigned_tower.has_method("is_alive") and assigned_tower.is_alive():
+			return assigned_tower
+		else:
+			# Assigned tower destroyed - mark it and allow moving to next objective
+			assigned_tower = null
+			first_tower_destroyed = true
+			print("First tower destroyed! Unit can now move freely toward next objective.")
+
+	# Fallback: search for any blocking tower
+	# Once first tower is destroyed, search ANY tower ahead (not just in-lane)
+	var lane_block_width = 15.0 if not first_tower_destroyed else 100.0  # Wide search after first tower
+
+	var blocking_tower: Node3D = null
+	var closest_dist: float = INF
+
 	for tower in towers:
 		if not is_instance_valid(tower):
 			continue
-		# Check if tower is actually alive (not just valid node)
 		if tower.has_method("is_alive") and not tower.is_alive():
 			continue
-		# Check if tower is in our lane
-		var tower_lane = Lane.LEFT if tower.global_position.x < 0 else Lane.RIGHT
-		if tower_lane == current_lane:
-			# Check if tower is between us and enemy base
-			if team == 0:  # Player team, enemy towers are at negative Z
-				if tower.global_position.z < global_position.z:
-					return tower
-			else:  # Enemy team
-				if tower.global_position.z > global_position.z:
-					return tower
-	return null
+		var tower_team = tower.team if "team" in tower else -1
+		if tower_team == team:
+			continue  # Skip friendly towers
+
+		var tower_pos = tower.global_position
+
+		# Check if this tower is ahead of us (toward enemy base)
+		if team == 0:  # Player team moves toward negative Z
+			if tower_pos.z > global_position.z:
+				continue  # Tower is behind us
+		else:  # Enemy team moves toward positive Z
+			if tower_pos.z < global_position.z:
+				continue  # Tower is behind us
+
+		# Check if tower is within search width (relaxed after first tower destroyed)
+		var x_diff = abs(tower_pos.x - global_position.x)
+		if x_diff > lane_block_width:
+			continue
+
+		# Find closest tower by actual distance (not just Z distance)
+		# This helps units smoothly path to the nearest remaining tower
+		var dist = global_position.distance_to(tower_pos)
+		if dist < closest_dist:
+			closest_dist = dist
+			blocking_tower = tower
+
+	return blocking_tower
 
 func _get_objective_position() -> Vector3:
 	# Get position to move toward
@@ -328,6 +442,49 @@ func _calculate_separation_force() -> Vector3:
 		separation = separation.normalized() * SEPARATION_STRENGTH
 
 	return separation
+
+## Calculate avoidance force for friendly towers - steer around them
+func _calculate_friendly_tower_avoidance() -> Vector3:
+	if towers.is_empty():
+		return Vector3.ZERO
+
+	var avoidance = Vector3.ZERO
+
+	for tower in towers:
+		if not is_instance_valid(tower):
+			continue
+		# Only avoid friendly towers (same team)
+		var tower_team = tower.team if "team" in tower else -1
+		if tower_team != team:
+			continue  # Skip enemy towers - we want to path TO them
+
+		var to_tower = tower.global_position - global_position
+		to_tower.y = 0
+		var dist = to_tower.length()
+
+		if dist < FRIENDLY_TOWER_AVOIDANCE_RANGE and dist > 0.5:
+			# Calculate avoidance - steer perpendicular to tower direction
+			var tower_dir = to_tower.normalized()
+
+			# Push strength increases as we get closer
+			var push_strength = 1.0 - (dist / FRIENDLY_TOWER_AVOIDANCE_RANGE)
+			push_strength = push_strength * push_strength  # Quadratic falloff
+
+			# Steer perpendicular - go around the tower, not just away
+			# Choose direction based on which side we're approaching from
+			var perpendicular = Vector3(-tower_dir.z, 0, tower_dir.x)
+
+			# Pick the perpendicular direction that's more aligned with our goal
+			var to_goal = _get_objective_position() - global_position
+			to_goal.y = 0
+			if to_goal.length() > 0.1:
+				if perpendicular.dot(to_goal) < 0:
+					perpendicular = -perpendicular
+
+			# Combine: push away + steer around
+			avoidance += (-tower_dir * 0.3 + perpendicular * 0.7).normalized() * push_strength
+
+	return avoidance.limit_length(FRIENDLY_TOWER_AVOIDANCE_STRENGTH)
 
 ## Predict if we'll collide with an ally and calculate avoidance
 func _calculate_predictive_avoidance() -> Vector3:
@@ -422,13 +579,24 @@ func _calculate_movement_direction(objective: Vector3) -> Vector3:
 	var direction = to_objective.normalized()
 
 	# Lane adherence: pull toward lane center
-	var lane_x = get_lane_center_x()
-	var x_offset = lane_x - global_position.x
+	# BUT relax lane adherence once first tower is destroyed (allows moving to center/other lanes)
+	var should_adhere_to_lane = not first_tower_destroyed
 
-	# Blend lane correction with forward movement
-	if abs(x_offset) > 1.0:
-		direction.x = lerp(direction.x, sign(x_offset), lane_adherence)
-		direction = direction.normalized()
+	# Also relax if target is significantly outside our lane
+	if current_target and is_instance_valid(current_target):
+		var target_x = current_target.global_position.x
+		var lane_x = get_lane_center_x()
+		if abs(target_x - lane_x) > LANE_WIDTH:
+			should_adhere_to_lane = false  # Target is outside lane, go to it
+
+	if should_adhere_to_lane:
+		var lane_x = get_lane_center_x()
+		var x_offset = lane_x - global_position.x
+
+		# Blend lane correction with forward movement
+		if abs(x_offset) > 1.0:
+			direction.x = lerp(direction.x, sign(x_offset), lane_adherence)
+			direction = direction.normalized()
 
 	# Proactive obstacle avoidance (raycast ahead)
 	_check_obstacles_ahead(direction)
@@ -452,6 +620,11 @@ func _calculate_movement_direction(objective: Vector3) -> Vector3:
 	var separation = _calculate_separation_force()
 	if separation.length() > 0.1:
 		direction = (direction + separation).normalized()
+
+	# Friendly tower avoidance: steer around allied towers
+	var tower_avoidance = _calculate_friendly_tower_avoidance()
+	if tower_avoidance.length() > 0.1:
+		direction = (direction + tower_avoidance).normalized()
 
 	# Predictive avoidance: steer to avoid future collisions with allies
 	var predictive = _calculate_predictive_avoidance()
@@ -593,7 +766,11 @@ func _is_in_attack_range(target: Node3D) -> bool:
 	if target.has_method("is_alive") and not target.is_alive():
 		return false
 
-	var dist = global_position.distance_to(target.global_position)
+	# Use HORIZONTAL distance (XZ only) - Y position shouldn't affect attack range
+	# This fixes issues with towers/bases that have elevated positions
+	var my_pos = global_position
+	var target_pos = target.global_position
+	var horizontal_dist = Vector2(my_pos.x - target_pos.x, my_pos.z - target_pos.z).length()
 
 	# Account for target size - larger structures have larger hitboxes
 	var target_size_bonus: float = 0.0
@@ -604,15 +781,39 @@ func _is_in_attack_range(target: Node3D) -> bool:
 		elif "tower" in target.name.to_lower():
 			target_size_bonus = 3.0  # Tower is medium-large
 
-	return dist <= attack_range + target_size_bonus
+	return horizontal_dist <= attack_range + target_size_bonus
 
 func on_attacked_by(attacker: Node3D) -> void:
 	# Respond to being attacked
 	unit_attacked.emit(attacker)
 
+	# Don't switch targets if we have a locked target that's still valid
+	if locked_target and is_instance_valid(locked_target):
+		if locked_target.has_method("is_alive") and locked_target.is_alive():
+			return  # Stay committed to current target
+
 	if current_state != AIState.ATTACKING:
 		current_target = attacker
 		current_state = AIState.RESPONDING
+
+func on_nearby_ally_killed(killer: Node3D) -> void:
+	# Vengeance mechanic: respond when a nearby ally is killed
+	# Only respond if not already engaged in combat
+	if not is_instance_valid(killer):
+		return
+
+	# Don't switch targets if we have a locked target that's still valid
+	if locked_target and is_instance_valid(locked_target):
+		if locked_target.has_method("is_alive") and locked_target.is_alive():
+			return  # Stay committed to current target
+
+	# Don't respond if already attacking something
+	if current_state == AIState.ATTACKING:
+		return
+
+	# Switch to responding - chase and attack the killer
+	current_target = killer
+	current_state = AIState.RESPONDING
 
 func set_idle() -> void:
 	current_state = AIState.IDLE

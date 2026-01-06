@@ -19,6 +19,10 @@ var unit_ai: UnitAI = null
 # Combat
 var attack_cooldown_timer: float = 0.0
 var is_attacking: bool = false
+var last_attacker: Node3D = null  # Track who last damaged this unit (for vengeance mechanic)
+
+# Vengeance mechanic - nearby allies respond when this unit dies
+const VENGEANCE_RANGE: float = 8.0  # How far allies can "see" a death
 
 # Collision
 var collision_shape: CollisionShape3D = null
@@ -204,18 +208,16 @@ func _update_hp_bar() -> void:
 			chunk.visible = false
 
 func _get_health_color(percent: float) -> Color:
-	# Green (>75%) -> Yellow (50-75%) -> Orange (25-50%) -> Red (<25%)
-	if percent > 0.75:
-		var t = (percent - 0.75) / 0.25
-		return Color(1.0 - t * 0.8, 0.9, 0.2)
-	elif percent > 0.5:
-		var t = (percent - 0.5) / 0.25
-		return Color(1.0, 0.5 + t * 0.4, 0.1)
-	elif percent > 0.25:
-		var t = (percent - 0.25) / 0.25
-		return Color(1.0, 0.2 + t * 0.3, 0.1)
+	# Team-based colors: Green for friendly (team 0), Red for enemy (team 1)
+	# Brightness varies slightly with health
+	var brightness = 0.7 + percent * 0.3  # 0.7 to 1.0 based on health
+
+	if team == 0:
+		# Friendly unit - Green
+		return Color(0.2 * brightness, 1.0 * brightness, 0.3 * brightness)
 	else:
-		return Color(0.9, 0.15, 0.1)
+		# Enemy unit - Red
+		return Color(1.0 * brightness, 0.2 * brightness, 0.2 * brightness)
 
 func set_bases(player_base: Node3D, enemy_base: Node3D) -> void:
 	if unit_ai:
@@ -225,18 +227,29 @@ func set_towers(towers: Array[Node3D]) -> void:
 	if unit_ai:
 		unit_ai.set_towers(towers)
 
+func set_assigned_tower(tower: Node3D, lane: int) -> void:
+	# Assign a specific blocking tower to this unit (deterministic targeting)
+	if unit_ai:
+		unit_ai.set_assigned_tower(tower, lane)
+
 func _process(delta: float) -> void:
 	# Handle attack cooldown
 	if attack_cooldown_timer > 0:
 		attack_cooldown_timer -= delta
 
-	# Attack if we have a target and cooldown is ready
-	if is_attacking and attack_cooldown_timer <= 0:
-		_perform_attack()
+	# INDEPENDENT ATTACK SYSTEM: Attack if cooldown ready + valid target in range
+	# This is separate from AI state - attacks happen regardless of state changes
+	if attack_cooldown_timer <= 0:
+		_try_attack()
 
-	# HP bar faces perpendicular to lanes (fixed rotation facing positive Z)
+	# HP bar billboards to face the camera
 	if hp_bar_container:
-		hp_bar_container.rotation.y = 0
+		var camera = get_viewport().get_camera_3d()
+		if camera:
+			var look_pos = camera.global_position
+			look_pos.y = hp_bar_container.global_position.y  # Keep level
+			hp_bar_container.look_at(look_pos, Vector3.UP)
+			hp_bar_container.rotate_y(PI)  # Flip to face camera
 
 func _physics_process(delta: float) -> void:
 	# Apply soft "jello" collision to nearby bodies
@@ -298,6 +311,64 @@ func _on_target_acquired(target: Node3D) -> void:
 func _on_target_lost() -> void:
 	is_attacking = false
 
+func _try_attack() -> void:
+	# Independent attack check - fires regardless of AI state
+	if not unit_ai:
+		return
+
+	var target = unit_ai.get_current_target()
+	if not is_instance_valid(target):
+		return
+
+	# Check if target is alive
+	if target.has_method("is_alive") and not target.is_alive():
+		return
+
+	# Check if target is in attack range (use horizontal distance)
+	if not _is_target_in_attack_range(target):
+		return
+
+	# All checks passed - attack!
+	_perform_attack_on_target(target)
+
+func _is_target_in_attack_range(target: Node3D) -> bool:
+	# Use horizontal distance (XZ only) - Y position shouldn't affect attack range
+	var my_pos = global_position
+	var target_pos = target.global_position
+	var horizontal_dist = Vector2(my_pos.x - target_pos.x, my_pos.z - target_pos.z).length()
+
+	# Get attack range from unit data
+	var attack_range = unit_data.attack_range / 10.0  # Scale same as AI setup
+
+	# Account for target size - larger structures have larger hitboxes
+	var target_size_bonus: float = 0.0
+	if target.has_method("get_team"):
+		if target is StaticBody3D:
+			target_size_bonus = 4.0  # Base is large
+		elif "tower" in target.name.to_lower():
+			target_size_bonus = 3.0  # Tower is medium-large
+
+	return horizontal_dist <= attack_range + target_size_bonus
+
+func _perform_attack_on_target(target: Node3D) -> void:
+	unit_attacking.emit(self, target)
+
+	# Check if this is a ranged unit with projectile
+	if unit_data.is_ranged and unit_data.projectile_speed > 0:
+		_fire_projectile(target)
+	else:
+		# Melee attack - deal damage directly
+		if target.has_method("take_damage"):
+			# Pass self as attacker for vengeance tracking
+			target.take_damage(unit_data.attack_damage, self)
+			print("%s attacks %s for %.1f damage" % [unit_data.unit_name, target.name, unit_data.attack_damage])
+			# Notify target who attacked them so they can respond
+			if target.has_method("on_attacked_by"):
+				target.on_attacked_by(self)
+
+	# Reset cooldown
+	attack_cooldown_timer = unit_data.attack_cooldown
+
 func _perform_attack() -> void:
 	if not unit_ai:
 		return
@@ -315,8 +386,12 @@ func _perform_attack() -> void:
 	else:
 		# Melee attack - deal damage directly
 		if target.has_method("take_damage"):
-			target.take_damage(unit_data.attack_damage)
+			# Pass self as attacker for vengeance tracking
+			target.take_damage(unit_data.attack_damage, self)
 			print("%s attacks %s for %.1f damage" % [unit_data.unit_name, target.name, unit_data.attack_damage])
+			# Notify target who attacked them so they can respond
+			if target.has_method("on_attacked_by"):
+				target.on_attacked_by(self)
 
 	# Reset cooldown
 	attack_cooldown_timer = unit_data.attack_cooldown
@@ -349,10 +424,15 @@ func _fire_projectile(target: Node3D) -> void:
 		0.3  # Model scale
 	)
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, attacker: Node3D = null) -> void:
 	current_health -= amount
 	current_health = max(0, current_health)
 	_update_hp_bar()
+
+	# Track last attacker for vengeance mechanic
+	if attacker and is_instance_valid(attacker):
+		last_attacker = attacker
+
 	print("%s took %.1f damage, health: %.1f/%.1f" % [unit_data.unit_name, amount, current_health, unit_data.max_health])
 
 	if current_health <= 0:
@@ -360,8 +440,43 @@ func take_damage(amount: float) -> void:
 
 func _die() -> void:
 	print("%s destroyed!" % unit_data.unit_name)
+
+	# Vengeance mechanic: notify nearby allies about the killer
+	if last_attacker and is_instance_valid(last_attacker):
+		_notify_nearby_allies_of_death(last_attacker)
+
 	unit_destroyed.emit(self)
 	queue_free()
+
+func _notify_nearby_allies_of_death(killer: Node3D) -> void:
+	# Find nearby allied units and tell them about the killer
+	var units_node = get_tree().get_first_node_in_group("placed_units")
+	if not units_node:
+		return
+
+	for unit in units_node.get_children():
+		if not is_instance_valid(unit) or unit == self:
+			continue
+
+		# Only notify allies (same team)
+		if unit.has_method("get_team") and unit.get_team() != team:
+			continue
+
+		# Check distance - use horizontal distance
+		var my_pos = global_position
+		var unit_pos = unit.global_position
+		var dist = Vector2(my_pos.x - unit_pos.x, my_pos.z - unit_pos.z).length()
+
+		if dist <= VENGEANCE_RANGE:
+			# Notify this ally about the killer
+			if unit.has_method("on_nearby_ally_killed"):
+				unit.on_nearby_ally_killed(killer)
+				print("%s witnessed ally death, targeting killer!" % unit.name)
+
+func on_nearby_ally_killed(killer: Node3D) -> void:
+	# Respond to nearby ally death - attack the killer
+	if unit_ai and is_instance_valid(killer):
+		unit_ai.on_nearby_ally_killed(killer)
 
 func get_grid_size() -> Vector2i:
 	if unit_data:

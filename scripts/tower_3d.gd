@@ -156,9 +156,15 @@ func _create_hp_bar() -> void:
 	_update_hp_bar()
 
 func _process(delta: float) -> void:
-	# HP bar faces perpendicular to lanes (across X axis, not along Z)
+	# HP bar billboards to face the camera
 	if hp_bar_container and not is_destroyed:
-		hp_bar_container.rotation.y = 0
+		var camera = get_viewport().get_camera_3d()
+		if camera:
+			# Make HP bar face the camera
+			var look_pos = camera.global_position
+			look_pos.y = hp_bar_container.global_position.y  # Keep level
+			hp_bar_container.look_at(look_pos, Vector3.UP)
+			hp_bar_container.rotate_y(PI)  # Flip to face camera
 
 	# Handle combat
 	if is_destroyed:
@@ -216,6 +222,7 @@ func _fire_at_target() -> void:
 	var tower_scale = scale.x if scale.x > 0 else 1.0
 	var spawn_pos = global_position + Vector3(0, 4.0 / tower_scale, 0)
 	projectile.global_position = spawn_pos
+	projectile.source_unit = self  # Track who fired so targets can respond
 
 	# Setup projectile with target position
 	var target_pos = current_target.global_position + Vector3(0, 1.0, 0)
@@ -246,24 +253,18 @@ func _update_hp_bar() -> void:
 			chunk.visible = false
 
 func _get_health_color(percent: float) -> Color:
-	# Green (>75%) -> Yellow (50-75%) -> Orange (25-50%) -> Red (<25%)
-	if percent > 0.75:
-		# Green to Yellow transition
-		var t = (percent - 0.75) / 0.25
-		return Color(1.0 - t * 0.8, 0.9, 0.2)  # Yellow to Green
-	elif percent > 0.5:
-		# Yellow to Orange transition
-		var t = (percent - 0.5) / 0.25
-		return Color(1.0, 0.5 + t * 0.4, 0.1)  # Orange to Yellow
-	elif percent > 0.25:
-		# Orange to Red transition
-		var t = (percent - 0.25) / 0.25
-		return Color(1.0, 0.2 + t * 0.3, 0.1)  # Red to Orange
-	else:
-		# Red
-		return Color(0.9, 0.15, 0.1)
+	# Team-based colors: Blue for friendly (team 0), Red for enemy (team 1)
+	# Brightness varies slightly with health
+	var brightness = 0.7 + percent * 0.3  # 0.7 to 1.0 based on health
 
-func take_damage(amount: float) -> void:
+	if team == 0:
+		# Friendly tower - Blue
+		return Color(0.2 * brightness, 0.5 * brightness, 1.0 * brightness)
+	else:
+		# Enemy tower - Red
+		return Color(1.0 * brightness, 0.2 * brightness, 0.2 * brightness)
+
+func take_damage(amount: float, _attacker: Node3D = null) -> void:
 	if is_destroyed:
 		return
 

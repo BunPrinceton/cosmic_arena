@@ -13,6 +13,12 @@ var player_base: Node3D = null
 var enemy_base: Node3D = null
 var towers: Array[Node3D] = []
 
+# Lane system - towers organized by lane for deterministic targeting
+# Lane X positions: Left=-20, Center=0, Right=20
+const LANE_POSITIONS: Array[float] = [-20.0, 0.0, 20.0]
+const LANE_WIDTH: float = 15.0  # Units within this distance of lane center belong to that lane
+var enemy_towers_by_lane: Dictionary = {}  # {lane_index: Array[Node3D]} - sorted by Z (closest first)
+
 # Obstacle positions for placement blocking
 var obstacle_positions: Array[Dictionary] = []  # {position: Vector3, size: Vector3}
 
@@ -68,6 +74,9 @@ func _find_bases_and_towers() -> void:
 		tower._ready()
 
 	print("Found %d towers" % towers.size())
+
+	# Organize enemy towers by lane for deterministic unit targeting
+	_organize_towers_by_lane()
 
 	# Find obstacles to block placement
 	_find_and_block_obstacles()
@@ -132,6 +141,74 @@ func _find_towers_recursive(node: Node, towers_to_init: Array[Node3D]) -> void:
 	var children = node.get_children()
 	for child in children:
 		_find_towers_recursive(child, towers_to_init)
+
+func _organize_towers_by_lane() -> void:
+	# Organize enemy towers by lane so units can be assigned specific blocking towers
+	# This gives units deterministic targeting instead of guessing
+	enemy_towers_by_lane.clear()
+
+	# Initialize empty arrays for each lane
+	for i in range(LANE_POSITIONS.size()):
+		enemy_towers_by_lane[i] = []
+
+	# Sort each enemy tower into its lane
+	for tower in towers:
+		if not is_instance_valid(tower):
+			continue
+
+		# Only track enemy towers (team 1)
+		var tower_team = tower.team if "team" in tower else -1
+		if tower_team != 1:
+			continue
+
+		# Find which lane this tower belongs to
+		var tower_x = tower.global_position.x
+		var best_lane = _get_lane_for_position(tower_x)
+
+		enemy_towers_by_lane[best_lane].append(tower)
+
+	# Sort each lane's towers by Z position (closest to player first, higher Z first)
+	for lane_idx in enemy_towers_by_lane.keys():
+		var lane_towers = enemy_towers_by_lane[lane_idx] as Array
+		lane_towers.sort_custom(func(a, b): return a.global_position.z > b.global_position.z)
+
+	# Debug output
+	for lane_idx in enemy_towers_by_lane.keys():
+		var lane_towers = enemy_towers_by_lane[lane_idx]
+		print("Lane %d (X=%.0f): %d enemy towers" % [lane_idx, LANE_POSITIONS[lane_idx], lane_towers.size()])
+		for tower in lane_towers:
+			print("  - %s at Z=%.1f" % [tower.name, tower.global_position.z])
+
+func _get_lane_for_position(x_pos: float) -> int:
+	# Determine which lane a position belongs to based on X coordinate
+	var best_lane = 0
+	var best_dist = INF
+
+	for i in range(LANE_POSITIONS.size()):
+		var dist = abs(x_pos - LANE_POSITIONS[i])
+		if dist < best_dist:
+			best_dist = dist
+			best_lane = i
+
+	return best_lane
+
+func _get_blocking_tower_for_position(spawn_pos: Vector3) -> Node3D:
+	# Get the first alive enemy tower blocking the path from spawn_pos to enemy base
+	var lane = _get_lane_for_position(spawn_pos.x)
+
+	if lane not in enemy_towers_by_lane:
+		return null
+
+	var lane_towers = enemy_towers_by_lane[lane] as Array
+
+	# Return the first alive tower in this lane (sorted by Z, closest first)
+	for tower in lane_towers:
+		if not is_instance_valid(tower):
+			continue
+		if tower.has_method("is_alive") and tower.is_alive():
+			return tower
+
+	return null
 
 func _setup_placed_units_container() -> void:
 	placed_units = Node3D.new()
@@ -272,6 +349,10 @@ func _on_unit_placed(unit_data: UnitData, position: Vector3) -> void:
 	var spawn_count = unit_data.spawn_count if unit_data.spawn_count > 0 else 1
 	var spread = unit_data.swarm_spread if unit_data.swarm_spread > 0 else 0.0
 
+	# Determine lane and blocking tower for this spawn position
+	var lane = _get_lane_for_position(position.x)
+	var blocking_tower = _get_blocking_tower_for_position(position)
+
 	for i in range(spawn_count):
 		# Calculate spawn offset for swarm
 		var spawn_offset = Vector3.ZERO
@@ -290,10 +371,14 @@ func _on_unit_placed(unit_data: UnitData, position: Vector3) -> void:
 		placed_unit.set_bases(player_base, enemy_base)
 		placed_unit.set_towers(towers)
 
+		# Assign the specific blocking tower for this lane (deterministic targeting)
+		placed_unit.set_assigned_tower(blocking_tower, lane)
+
 		# Connect to unit destroyed
 		placed_unit.unit_destroyed.connect(_on_unit_destroyed)
 
-	print("Placed %s x%d at %s" % [unit_data.unit_name, spawn_count, position])
+	var tower_name = blocking_tower.name if blocking_tower else "none"
+	print("Placed %s x%d at %s (lane %d, blocking tower: %s)" % [unit_data.unit_name, spawn_count, position, lane, tower_name])
 
 func _on_placement_cancelled() -> void:
 	print("Placement cancelled")

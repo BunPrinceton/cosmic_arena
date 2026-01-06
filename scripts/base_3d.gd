@@ -86,9 +86,14 @@ func _create_hp_bar() -> void:
 	_update_hp_bar()
 
 func _process(_delta: float) -> void:
-	# HP bar faces perpendicular to lanes (fixed rotation facing positive Z)
+	# HP bar billboards to face the camera
 	if hp_bar_container and not is_destroyed:
-		hp_bar_container.rotation.y = 0
+		var camera = get_viewport().get_camera_3d()
+		if camera:
+			var look_pos = camera.global_position
+			look_pos.y = hp_bar_container.global_position.y  # Keep level
+			hp_bar_container.look_at(look_pos, Vector3.UP)
+			hp_bar_container.rotate_y(PI)  # Flip to face camera
 
 func _update_hp_bar() -> void:
 	var health_percent = current_health / max_health
@@ -105,19 +110,18 @@ func _update_hp_bar() -> void:
 			chunk.visible = false
 
 func _get_health_color(percent: float) -> Color:
-	if percent > 0.75:
-		var t = (percent - 0.75) / 0.25
-		return Color(1.0 - t * 0.8, 0.9, 0.2)
-	elif percent > 0.5:
-		var t = (percent - 0.5) / 0.25
-		return Color(1.0, 0.5 + t * 0.4, 0.1)
-	elif percent > 0.25:
-		var t = (percent - 0.25) / 0.25
-		return Color(1.0, 0.2 + t * 0.3, 0.1)
-	else:
-		return Color(0.9, 0.15, 0.1)
+	# Team-based colors: Blue for friendly (team 0), Red for enemy (team 1)
+	# Brightness varies slightly with health
+	var brightness = 0.7 + percent * 0.3  # 0.7 to 1.0 based on health
 
-func take_damage(amount: float) -> void:
+	if team == 0:
+		# Friendly base - Blue
+		return Color(0.2 * brightness, 0.5 * brightness, 1.0 * brightness)
+	else:
+		# Enemy base - Red
+		return Color(1.0 * brightness, 0.2 * brightness, 0.2 * brightness)
+
+func take_damage(amount: float, _attacker: Node3D = null) -> void:
 	if is_destroyed:
 		return
 

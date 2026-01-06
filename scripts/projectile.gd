@@ -129,7 +129,11 @@ func _deal_splash_damage() -> void:
 		if dist <= splash_radius:
 			if target.has_method("take_damage"):
 				var falloff = 1.0 - (dist / splash_radius) * 0.5
-				target.take_damage(damage * falloff)
+				# Pass attacker for vengeance tracking and response
+				target.take_damage(damage * falloff, source_unit)
+				# Notify target who attacked them so they can respond
+				if target.has_method("on_attacked_by") and is_instance_valid(source_unit):
+					target.on_attacked_by(source_unit)
 
 func _deal_single_target_damage() -> void:
 	var targets = _get_all_damageable_targets()
@@ -150,4 +154,8 @@ func _deal_single_target_damage() -> void:
 			closest_target = target
 
 	if closest_target and closest_target.has_method("take_damage"):
-		closest_target.take_damage(damage)
+		# Pass attacker for vengeance tracking and response
+		closest_target.take_damage(damage, source_unit)
+		# Notify target who attacked them so they can respond
+		if closest_target.has_method("on_attacked_by") and is_instance_valid(source_unit):
+			closest_target.on_attacked_by(source_unit)
