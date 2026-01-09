@@ -69,6 +69,10 @@ var calculated_card_size: Vector2 = Vector2(100, 150)  # Will be calculated dyna
 # Card detail popup
 var card_detail_popup: Panel
 
+# Pack shop
+var pack_shop: PackShop
+var pack_shop_scene: PackedScene
+
 # Store original positions for animation
 var original_viewport_size: Vector2
 var original_viewport_position: Vector2
@@ -93,6 +97,7 @@ func _ready() -> void:
 	_setup_coming_soon_popup()
 	_setup_deck_view()
 	_setup_card_detail_popup()
+	_setup_pack_shop()
 
 	# Store original positions for animations
 	_store_original_positions()
@@ -151,7 +156,7 @@ func _setup_navigation() -> void:
 		{"id": "battle", "text": "BATTLE", "enabled": true},
 		{"id": "rewards", "text": "REWARDS", "enabled": false},
 		{"id": "deck", "text": "DECK", "enabled": true},  # Now functional!
-		{"id": "shop", "text": "SHOP", "enabled": false},
+		{"id": "shop", "text": "SHOP", "enabled": true},  # Pack shop!
 		{"id": "trade", "text": "TRADE", "enabled": false},
 		{"id": "guild", "text": "GUILD", "enabled": false},
 	]
@@ -242,6 +247,8 @@ func _on_nav_pressed(nav_id: String) -> void:
 			_update_nav_highlight("deck")
 			if current_view != "deck":
 				_transition_to_deck()
+		"shop":
+			_open_pack_shop()
 		_:
 			_show_coming_soon()
 
@@ -482,6 +489,34 @@ func _hide_coming_soon() -> void:
 
 func _on_settings_pressed() -> void:
 	_show_coming_soon()
+
+
+## Setup pack shop (lazy loaded)
+func _setup_pack_shop() -> void:
+	pack_shop_scene = preload("res://scenes/pack_shop.tscn")
+
+
+## Open the pack shop overlay
+func _open_pack_shop() -> void:
+	_update_nav_highlight("shop")
+
+	# Create pack shop instance if needed
+	if not pack_shop or not is_instance_valid(pack_shop):
+		pack_shop = pack_shop_scene.instantiate()
+		pack_shop.shop_closed.connect(_on_pack_shop_closed)
+		add_child(pack_shop)  # Must add to tree before setting data (so _ready() runs first)
+		pack_shop.set_player_data(player_data)
+	else:
+		pack_shop.set_player_data(player_data)
+		pack_shop.show()
+
+
+## Handle pack shop closed
+func _on_pack_shop_closed() -> void:
+	# Update currencies in case they changed
+	_update_player_stats()
+	# Return to battle view
+	_update_nav_highlight("battle")
 
 
 func _update_player_stats() -> void:

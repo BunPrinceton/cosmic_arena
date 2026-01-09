@@ -1,0 +1,61 @@
+[gd_scene load_steps=3 format=3 uid="uid://dk4n7r3m9yxps"]
+
+[ext_resource type="PackedScene" uid="uid://bk8m3p2n5wxqt" path="res://scenes/pack_shop.tscn" id="1_shop"]
+
+[sub_resource type="GDScript" id="GDScript_test"]
+script/source = "extends Control
+
+## Test scene for pack opening system
+## Run this scene to test the pack shop and opening animations
+
+@onready var pack_shop: PackShop = $PackShop
+
+func _ready() -> void:
+	# Create demo player data with some currency
+	var demo_player = PlayerData.new()
+	demo_player.credits = 15000
+	demo_player.gems = 500
+	pack_shop.set_player_data(demo_player)
+
+	# Create player collection for tracking ownership
+	var demo_collection = PlayerCollection.new()
+	pack_shop.set_player_collection(demo_collection)
+
+	# Connect signals for testing
+	pack_shop.pack_purchased.connect(_on_pack_purchased)
+	pack_shop.shop_closed.connect(_on_shop_closed)
+
+	print('Pack Opening Test Scene Ready!')
+	print('- Click on a pack to open it')
+	print('- Press ESC to go back')
+	print('- Collection tracking enabled - check console for ownership updates!')
+
+
+func _on_pack_purchased(pack_type: PackOpening.PackType) -> void:
+	var pack_names = ['Basic', 'Premium', 'Legendary']
+	print('Purchased: %s Pack' % pack_names[pack_type])
+
+
+func _on_shop_closed() -> void:
+	print('Shop closed - returning to main menu')
+	get_tree().change_scene_to_file('res://scenes/main_menu.tscn')
+
+
+func _input(event: InputEvent) -> void:
+	# Quick test keys
+	if event.is_action_pressed('ui_accept'):
+		# Reopen shop if closed
+		pack_shop.show()
+"
+
+[node name="PackOpeningTest" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_test")
+
+[node name="PackShop" parent="." instance=ExtResource("1_shop")]
+layout_mode = 1

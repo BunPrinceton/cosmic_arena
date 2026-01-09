@@ -17,8 +17,8 @@ class_name PlayerData
 @export var rank_points: int = 1491
 
 @export_group("Currencies")
-@export var credits: int = 1500
-@export var gems: int = 361
+@export var credits: int = 100000  # Increased for pack opening testing
+@export var gems: int = 10000      # Increased for pack opening testing
 @export var gold: int = 7620
 
 @export_group("Collection")
