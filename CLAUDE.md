@@ -62,6 +62,24 @@ func _ready():
         move_speed = unit_data.move_speed
 ```
 
+### Pure Systems Architecture (`scripts/systems/`)
+
+The `systems/` directory contains **pure, headless modules** - zero UI dependencies:
+
+- **Extends RefCounted** (not Node/Control) - no scene tree needed
+- **Static methods preferred** - can be called from anywhere
+- **No signals** - pure functions return data
+- **Deterministic** - same input always produces same output (with seeding)
+- **Testable** - can run without game engine via example scripts
+
+**Why separate?**
+- UI can change without touching game logic
+- Logic can be unit tested independently
+- Systems can run headless (server-side, CLI tools)
+- Clear separation: UI presents, Systems compute, Resources define
+
+**Pattern**: UI layer calls System layer, System returns pure data, UI displays it.
+
 ### Critical Naming Conflicts
 
 **IMPORTANT**: Two different "GameState" concepts exist:
@@ -182,6 +200,80 @@ Available commanders in `GameState.AVAILABLE_COMMANDERS`:
 - **Rank**: rank_tier ("BRONZIUM"), rank_tier_level (1-5), rank_points
 - **Currencies**: credits, gems, gold
 
+## Pack Opening System
+
+The game features a complete card pack system with three pure, headless layers:
+
+### Architecture Overview
+
+```
+PackShop (UI) → PackOpening (UI + Animation) → PackGenerator (Pure Logic)
+                                              ↓
+                                    PlayerCollection (Pure Data)
+                                              ↓
+                                        CardData (Resources)
+```
+
+### PackGenerator (`scripts/systems/pack_generator.gd`)
+
+**Pure, deterministic pack generation system** - completely UI-independent.
+
+- **Function**: `PackGenerator.generate_pack(pack_type, card_pool, seed) -> Array[CardData]`
+- **Pack Types**: BASIC (4 cards), PREMIUM (5 cards, rare+ guaranteed), LEGENDARY (6 cards, epic+ guaranteed)
+- **Seeding**: Pass `seed != -1` for deterministic generation (testing, server-side validation)
+- **No Dependencies**: No UI, no signals, no side effects
+
+**Key Design**: Extracts all game logic from UI layer. Can be unit tested without running the game.
+
+### PlayerCollection (`scripts/systems/player_collection.gd`)
+
+**Pure ownership tracking system** - stores only card IDs and counts.
+
+- **Data Structure**: `Dictionary { card_id: count }` - never stores CardData objects
+- **Function**: `collection.add_cards(cards) -> { "added": [...], "duplicates": [...] }`
+- **Save/Load**: `to_dict()` and `from_dict()` for serialization
+- **Why IDs only?**: 98% smaller save files, no memory leaks, CardData loaded on-demand
+
+**Key Design**: Separates ownership data from resource definitions. Save-friendly, testable.
+
+### PackOpening (`scripts/pack_opening.gd`)
+
+**UI layer with animations** - handles presentation only.
+
+- **Animations**: Shake, glow burst, card flip, sparkles, screen shake (rarity-based)
+- **Skip Support**: Skip and normal paths produce identical results (cards generated once)
+- **Integration**: Calls `PackGenerator.generate_pack()` then `PlayerCollection.add_cards()`
+
+**Key Pattern**: After `_finish_reveal()`, cards are added to collection and logged to console.
+
+### Testing Pack System
+
+```bash
+# Standalone pack opening test
+godot --path . scenes/pack_opening_test.tscn
+
+# PackGenerator examples (determinism)
+godot --path . --script scripts/systems/pack_generator_example.gd
+
+# PlayerCollection examples (ownership tracking)
+godot --path . --script scripts/systems/player_collection_example.gd
+```
+
+### CardData Resource (`scripts/resources/card_data.gd`)
+
+Defines individual cards with rarity system:
+
+- **Rarities**: COMMON (60% weight), RARE (25%), EPIC (12%), LEGENDARY (3%)
+- **Types**: UNIT, COMMANDER, ABILITY, EQUIPMENT
+- **Factory Methods**: `CardData.from_unit_data()`, `CardData.from_commander_data()`
+- **Display Helpers**: `get_rarity_color()`, `get_glow_color()`, `get_rarity_name()`
+
+### Integration with Main Menu
+
+From main menu → "Shop" navigation → PackShop opens → Purchase pack → PackOpening animates → Collection updated
+
+**Important**: PackShop must call `set_player_collection()` to enable ownership tracking.
+
 ## 3D Battle Scene (main_3d.tscn)
 
 The active game scene with Force Arena-style gameplay:
@@ -254,6 +346,9 @@ cosmic_arena/
 │   ├── main_menu.tscn   # Force Arena-style menu (entry point)
 │   ├── main_3d.tscn     # 3D battle scene (active development)
 │   ├── main.tscn        # 2D battle (deprecated)
+│   ├── pack_shop.tscn   # Pack shop UI
+│   ├── pack_opening.tscn # Pack opening UI with animations
+│   ├── pack_opening_test.tscn # Standalone pack testing scene
 │   ├── ui/
 │   │   └── character_viewport.tscn  # 3D character preview
 │   └── ...
@@ -262,8 +357,14 @@ cosmic_arena/
 │   ├── player_3d.gd     # 3D player controller
 │   ├── camera_3d_follow.gd
 │   ├── game_state.gd    # Autoload singleton
+│   ├── pack_shop.gd     # Pack shop controller
+│   ├── pack_opening.gd  # Pack opening UI + animations
 │   ├── resources/
-│   │   └── player_data.gd  # Player progression
+│   │   ├── player_data.gd  # Player progression
+│   │   └── card_data.gd    # Card definitions
+│   ├── systems/         # Pure logic systems (no UI dependencies)
+│   │   ├── pack_generator.gd # Pure pack generation
+│   │   └── player_collection.gd # Pure ownership tracking
 │   ├── ui/
 │   │   └── character_viewport.gd
 │   ├── units/           # Unit classes
@@ -272,6 +373,9 @@ cosmic_arena/
 │   ├── units/           # Unit stat .tres files
 │   └── commanders/      # Commander .tres files
 └── docs/                # Technical documentation
+    ├── pack_generator_integration.md
+    ├── player_collection_system.md
+    └── pack_collection_integration.md
 ```
 
 ## Code Style
